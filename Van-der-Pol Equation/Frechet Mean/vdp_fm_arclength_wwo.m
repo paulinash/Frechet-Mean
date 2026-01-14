@@ -9,7 +9,7 @@ clear; close all; clc;
 
 %% USER OPTIONS
 epsilon   = 0.1;
-dynamics = true;
+dynamics = false;
 useColor = true;
 
 % Samples of a
@@ -187,7 +187,7 @@ for k = 1:Na
     plot([aligned{k}(:,1);  aligned{k}(1,1)], [aligned{k}(:,2);  aligned{k}(1,2)],'Color',colors(k,:),'LineWidth',1.0, 'DisplayName',sprintf('a=%.2f',a_vals(k)));
 end
 plot([meanCurve(:,1); meanCurve(1,1)], [meanCurve(:,2); meanCurve(1,2)],'k','LineWidth',2,'DisplayName','mean curve');
-exportgraphics(gcf,'Figures/arc_param/fig_frechet_mean.pdf','ContentType','vector');
+exportgraphics(gcf,'Figures_vdp/arc_param/fig_frechet_mean.pdf','ContentType','vector');
 
 
 % Create moving markers showing fast-slow dynamic for sample and mean curves
@@ -291,7 +291,7 @@ end
 %% ================================================================
 %   SNAPSHOT EXPORT (6 frames) – put THIS right before the while true loop
 %% ================================================================
-outDir = 'Figures/arc_param';
+outDir = 'Figures_vdp/arc_param';
 if ~exist(outDir,'dir'); mkdir(outDir); end
 
 nFrames = 9;

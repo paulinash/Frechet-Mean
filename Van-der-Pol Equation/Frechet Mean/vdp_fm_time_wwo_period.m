@@ -152,7 +152,7 @@ end
 plot([meanCurve(:,1); meanCurve(1,1)], [meanCurve(:,2); meanCurve(1,2)],'k','LineWidth',2);
 
 xlabel('x'); ylabel('y');
-exportgraphics(gcf,'Figures/time_param/fig_frechet_mean.pdf','ContentType','vector');
+exportgraphics(gcf,'Figures_vdp/time_param/fig_frechet_mean.pdf','ContentType','vector');
 
 
 %% ================================================================
@@ -171,7 +171,7 @@ hMean = plot(meanCurve(1,1), meanCurve(1,2),'ko', ...
 %% ================================================================
 % SNAPSHOT EXPORT 
 %% ================================================================
-outDir = 'Figures/time_param';
+outDir = 'Figures_vdp/time_param';
 if ~exist(outDir,'dir'); mkdir(outDir); end
 
 nFrames = 9;                                   % how many snapshots you want

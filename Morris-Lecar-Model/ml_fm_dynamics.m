@@ -13,10 +13,11 @@ clear; close all; clc;
 %% ================= USER SETTINGS =================
 low = 45;
 high = 45.2;
-N = 30;
+N = 15;
 I_vals = (high-low).*rand(N,1) + low;
 I_vals = sort(I_vals);
-%I_vals = linspace(45,45.2,N);
+I_vals = linspace(45,45.2,N);
+useColor = true; 
 
 Tfinal = 8000;
 dt_sim = 0.05;
@@ -191,39 +192,55 @@ dt_mean = ds ./ spm;
 cumTime_mean = [0;cumsum(dt_mean)];
 cumTime_mean = cumTime_mean * mean(periods) / cumTime_mean(end);
 
+if useColor
+    colors = lines(N);            % one color per sample
+    colors = 0.5*colors + 0.5;   % mix with white
+
+else
+    gray = [0.75 0.75 0.75];       % light gray
+    colors = repmat(gray, N, 1);  % same gray for all samples
+end
+
 %% ================= 2D PLOTS =================
-figure('Color','w','Position',[100 100 800 800]);
-subplot(3,1,1); hold on; 
+% V(t)
+figure('Color','w','Position',[100 100 1400 600]); hold on;
 for k=1:N 
-    plot(rawT{k} - rawT{k}(1),rawZ{k}(:,1), 'DisplayName', sprintf('I=%.2f', I_vals(k))); 
+    plot(rawT{k} - rawT{k}(1),rawZ{k}(:,1), 'DisplayName', sprintf('I=%.2f', I_vals(k)),'Color',colors(k,:)); 
 end
 plot(cumTime_mean(1:end-1), Cm_w(1:end-1,1), 'LineWidth',1.5, 'Color','k', 'DisplayName','mean');
-xlabel('t'); ylabel('V'); legend('location','best'); title('V(t) over one burst');
+xlabel('t'); ylabel('V'); title('V(t) over one burst');
+exportgraphics(gcf,'Figures_ml/2D_V.pdf','ContentType','vector');
 
-subplot(3,1,2); hold on; 
+% y(t)
+figure('Color','w','Position',[100 100 1400 600]); hold on;
 for k=1:N
-    plot(rawT{k}-rawT{k}(1),rawZ{k}(:,3), 'DisplayName',sprintf('I=%.2f', I_vals(k))); 
+    plot(rawT{k}-rawT{k}(1),rawZ{k}(:,3), 'DisplayName',sprintf('I=%.2f', I_vals(k)),'Color',colors(k,:)); 
 end
 plot(cumTime_mean(1:end-1), Cm_w(1:end-1,3), 'LineWidth',1.5, 'Color','k','DisplayName','mean')
-xlabel('t'); ylabel('y'); legend('location','best'); title('y(t) over one burst'); 
+xlabel('t'); ylabel('y'); title('y(t) over one burst'); 
+exportgraphics(gcf,'Figures_ml/2D_y.pdf','ContentType','vector');
 
-subplot(3,1,3); hold on; 
+% w(t)
+figure('Color','w','Position',[100 100 1400 600]); hold on;
 for k=1:N
-    plot(rawT{k}-rawT{k}(1),rawZ{k}(:,2), 'DisplayName',sprintf('I=%.2f', I_vals(k))); 
+    plot(rawT{k}-rawT{k}(1),rawZ{k}(:,2), 'DisplayName',sprintf('I=%.2f', I_vals(k)),'Color',colors(k,:)); 
 end
 plot(cumTime_mean(1:end-1), Cm_w(1:end-1,2), 'LineWidth',1.5, 'Color','k','DisplayName','mean')
-xlabel('t'); ylabel('y'); legend('location','best'); title('w(t) over one burst'); 
+xlabel('t'); ylabel('y'); title('w(t) over one burst'); 
+exportgraphics(gcf,'Figures_ml/2D_w.pdf','ContentType','vector');
 
 
 %% ================= 3D PLOT WITH TRACKERS =================
 figure('Color','w','Position',[200 100 900 700]); hold on; grid on;
-colors = lines(N);
+
 for k=1:N
-    plot3([aligned{k}(:,1); aligned{k}(1,1)],[aligned{k}(:,2); aligned{k}(1,2)],...
+    h = plot3([aligned{k}(:,1); aligned{k}(1,1)],[aligned{k}(:,2); aligned{k}(1,2)],...
         [aligned{k}(:,3); aligned{k}(1,3)],'Color',colors(k,:),...
         'LineWidth',1.2,'DisplayName',sprintf('I=%.2f', I_vals(k))); 
+    h.Color(4) = 0.3;
 end
-plot3(meanC(:,1),meanC(:,2),meanC(:,3),'k','LineWidth',2, 'DisplayName','mean curve');
+plot3(meanC(:,1),meanC(:,2),meanC(:,3),'k','LineWidth',3, 'DisplayName','mean curve');
+
 
 % Initialize moving trackers
 hCurve = gobjects(N,1);
@@ -236,8 +253,52 @@ hMean = plot3(meanC(1,1),meanC(1,2),meanC(1,3),'ok',...
 
 xlabel('V'); ylabel('w'); zlabel('y'); 
 title('3D trajectories with mean tracker'); 
-legend('location', 'southeast')
 view([-30 20]);
+exportgraphics(gcf,'Figures_ml/3D.pdf','ContentType','image','Resolution',600);
+
+
+%% ================================================================
+% SNAPSHOT EXPORT (3D tracker positions at selected times)
+%% ================================================================
+outDir = 'Figures_ml/';
+if ~exist(outDir,'dir'); mkdir(outDir); end
+
+nFrames = 9;  % number of snapshots
+meanPeriod = mean(periods);
+
+% Choose snapshot times over one mean period (exclude endpoint so 0 != end)
+frameTimes = linspace(0, meanPeriod, nFrames+1);
+frameTimes(end) = [];
+
+% (Optional) nicer consistent camera for all snapshots
+% view([-30 20]);  % you already set view; keep if you want
+
+for f = 1:numel(frameTimes)
+    t_global = frameTimes(f);
+
+    % --- update sample trackers (same logic as animation) ---
+    for k = 1:N
+        tloc = mod(t_global, cumTime{k}(end));  % each curve's reconstructed period
+        px = interp1(cumTime{k}, posInterp{k}(:,1), tloc, 'pchip');
+        py = interp1(cumTime{k}, posInterp{k}(:,2), tloc, 'pchip');
+        pz = interp1(cumTime{k}, posInterp{k}(:,3), tloc, 'pchip');
+        set(hCurve(k),'XData',px,'YData',py,'ZData',pz);
+    end
+
+    % --- update mean tracker ---
+    tloc = mod(t_global, cumTime_mean(end));
+    px = interp1(cumTime_mean, Cm_w(:,1), tloc, 'pchip');
+    py = interp1(cumTime_mean, Cm_w(:,2), tloc, 'pchip');
+    pz = interp1(cumTime_mean, Cm_w(:,3), tloc, 'pchip');
+    set(hMean,'XData',px,'YData',py,'ZData',pz);
+
+    drawnow;
+
+    % Export snapshot
+    exportgraphics(gcf, fullfile(outDir, sprintf('3D_frame_%02d.pdf', f)), ...
+        'Resolution',600,'ContentType','image');
+end
+
 
 
 %% ================= ANIMATION LOOP =================
