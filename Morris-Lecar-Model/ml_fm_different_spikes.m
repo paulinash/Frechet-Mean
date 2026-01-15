@@ -1,7 +1,8 @@
-function ml_fm_dynamics
+function ml_fm_different_spikes
 % ================================================================
 % Simulates Morris-Lecar bursting for multiple applied currents.
 % Extracts the periods from each simulation using the slow variable.
+% Also allows different number of bursts
 % Resamples the burst trajectory along normalized arc length.
 % Computes the geometrical Fréchet mean of all curves, allowing rotational alignment.
 % Reconstructs time parametrization for dynamics
@@ -13,11 +14,13 @@ clear; close all; clc;
 %% ================= USER SETTINGS =================
 low = 44.8;
 high = 44.9;
-N = 15;
+N = 8;
 I_vals = (high-low).*rand(N,1) + low;
 I_vals = sort(I_vals);
 I_vals = linspace(low,high,N);
 useColor = true; 
+snapshot = false;
+export_plots = true;
 
 Tfinal = 8000;
 dt_sim = 0.05;
@@ -25,8 +28,8 @@ tspan = 0:dt_sim:Tfinal;
 
 % M needs to be quite high so that the phase shift actually does something
 % (>1000)
-M = 2000;                        % Number of points along burst curves
-maxIter = 40;                    % Max iterations for Fréchet mean
+M = 100;                        % Number of points along burst curves
+maxIter = 20;                    % Max iterations for Fréchet mean
 tol = 1e-8;                      % Convergence tolerance
 
 %% ================= MODEL PARAMETERS ================
@@ -117,7 +120,7 @@ end
 
 % Validate spike count
 if numel(unique(spikeCounts)) ~= 1
-    error('ABORT: bursts have different spike counts: %s', mat2str(spikeCounts));
+    fprintf('ATTENTION: bursts have different spike counts: %s \n', mat2str(spikeCounts));
 end
 fprintf('All bursts validated: spikes=%d\n', spikeCounts(1));
 fprintf('Mean Period = %.2f \n', mean(periods));
@@ -163,11 +166,16 @@ for iter = 1:maxIter % Iterate until convergence
     meanC = mean(cat(3,aligned{:}),3);
 
     % Check convergence
-    if norm(meanC(:)-mean_old(:)) / (norm(mean_old(:))+eps) < tol
+    rel_change =norm(meanC(:)-mean_old(:)) / (norm(mean_old(:))+eps);
+    if rel_change < tol
+        fprintf(['Fréchet mean converged in %d iterations with relativ ' ...
+            'change %.10f \n'], iter, rel_change);
         break
     end
 end
-fprintf('Fréchet mean converged in %d iterations\n', iter);
+if iter == maxIter
+    fprintf('Max iter %d reached with relative change %.10f \n', iter, rel_change);
+end
 
 %% ================= TIME RECONSTRUCTION FOR ANIMATION =================
 cumTime = cell(N,1); posInterp = cell(N,1); allSpeeds = zeros(N,M);
@@ -210,7 +218,9 @@ for k=1:N
 end
 plot(cumTime_mean(1:end-1), Cm_w(1:end-1,1), 'LineWidth',1.5, 'Color','k', 'DisplayName','mean');
 xlabel('t'); ylabel('V'); title('V(t) over one burst');
-exportgraphics(gcf,'Figures_ml/2D_V.pdf','ContentType','vector');
+if export_plots
+    exportgraphics(gcf,'Figures_ml/2D_V.pdf','ContentType','vector');
+end
 
 % y(t)
 figure('Color','w','Position',[100 100 1400 600]); hold on;
@@ -220,7 +230,9 @@ for k=1:N
 end
 plot(cumTime_mean(1:end-1), Cm_w(1:end-1,3), 'LineWidth',1.5, 'Color','k','DisplayName','mean')
 xlabel('t'); ylabel('y'); title('y(t) over one burst'); 
-exportgraphics(gcf,'Figures_ml/2D_y.pdf','ContentType','vector');
+if export_plots
+    exportgraphics(gcf,'Figures_ml/2D_y.pdf','ContentType','vector');
+end
 
 % w(t)
 figure('Color','w','Position',[100 100 1400 600]); hold on;
@@ -230,8 +242,9 @@ for k=1:N
 end
 plot(cumTime_mean(1:end-1), Cm_w(1:end-1,2), 'LineWidth',1.5, 'Color','k','DisplayName','mean')
 xlabel('t'); ylabel('y'); title('w(t) over one burst'); 
-exportgraphics(gcf,'Figures_ml/2D_w.pdf','ContentType','vector');
-
+if export_plots
+    exportgraphics(gcf,'Figures_ml/2D_w.pdf','ContentType','vector');
+end
 
 %% ================= 3D PLOT WITH TRACKERS =================
 figure('Color','w','Position',[200 100 900 700]); hold on; grid on;
@@ -247,7 +260,9 @@ plot3([meanC(:,1);meanC(1,1)],[meanC(:,2);meanC(1,2)],[meanC(:,3);meanC(1,3)],'k
 xlabel('V'); ylabel('w'); zlabel('y'); 
 title('3D trajectories with mean tracker'); 
 view([-30 20]);
-exportgraphics(gcf,'Figures_ml/3D.pdf','ContentType','image','Resolution',600);
+if export_plots
+    exportgraphics(gcf,'Figures_ml/3D.pdf','ContentType','image','Resolution',600);
+end
 
 % Initialize moving trackers
 hCurve = gobjects(N,1);
@@ -262,43 +277,45 @@ hMean = plot3(meanC(1,1),meanC(1,2),meanC(1,3),'ok',...
 %% ================================================================
 % SNAPSHOT EXPORT (3D tracker positions at selected times)
 %% ================================================================
-outDir = 'Figures_ml/';
-if ~exist(outDir,'dir'); mkdir(outDir); end
+if snapshot
+    outDir = 'Figures_ml/';
+    if ~exist(outDir,'dir'); mkdir(outDir); end
 
-nFrames = 9;  % number of snapshots
-meanPeriod = mean(periods);
+    nFrames = 9;  % number of snapshots
+    meanPeriod = mean(periods);
 
-% Choose snapshot times over one mean period (exclude endpoint so 0 != end)
-frameTimes = linspace(0, meanPeriod, nFrames+1);
-frameTimes(end) = [];
+    % Choose snapshot times over one mean period (exclude endpoint so 0 != end)
+    frameTimes = linspace(0, meanPeriod, nFrames+1);
+    frameTimes(end) = [];
 
-% (Optional) nicer consistent camera for all snapshots
-% view([-30 20]);  % you already set view; keep if you want
+    % (Optional) nicer consistent camera for all snapshots
+    % view([-30 20]);  % you already set view; keep if you want
 
-for f = 1:numel(frameTimes)
-    t_global = frameTimes(f);
+    for f = 1:numel(frameTimes)
+        t_global = frameTimes(f);
 
-    % --- update sample trackers (same logic as animation) ---
-    for k = 1:N
-        tloc = mod(t_global, cumTime{k}(end));  % each curve's reconstructed period
-        px = interp1(cumTime{k}, posInterp{k}(:,1), tloc, 'pchip');
-        py = interp1(cumTime{k}, posInterp{k}(:,2), tloc, 'pchip');
-        pz = interp1(cumTime{k}, posInterp{k}(:,3), tloc, 'pchip');
-        set(hCurve(k),'XData',px,'YData',py,'ZData',pz);
+        % --- update sample trackers (same logic as animation) ---
+        for k = 1:N
+            tloc = mod(t_global, cumTime{k}(end));  % each curve's reconstructed period
+            px = interp1(cumTime{k}, posInterp{k}(:,1), tloc, 'pchip');
+            py = interp1(cumTime{k}, posInterp{k}(:,2), tloc, 'pchip');
+            pz = interp1(cumTime{k}, posInterp{k}(:,3), tloc, 'pchip');
+            set(hCurve(k),'XData',px,'YData',py,'ZData',pz);
+        end
+
+        % --- update mean tracker ---
+        tloc = mod(t_global, cumTime_mean(end));
+        px = interp1(cumTime_mean, Cm_w(:,1), tloc, 'pchip');
+        py = interp1(cumTime_mean, Cm_w(:,2), tloc, 'pchip');
+        pz = interp1(cumTime_mean, Cm_w(:,3), tloc, 'pchip');
+        set(hMean,'XData',px,'YData',py,'ZData',pz);
+
+        drawnow;
+
+        % Export snapshot
+        exportgraphics(gcf, fullfile(outDir, sprintf('3D_frame_%02d.pdf', f)), ...
+            'Resolution',600,'ContentType','image');
     end
-
-    % --- update mean tracker ---
-    tloc = mod(t_global, cumTime_mean(end));
-    px = interp1(cumTime_mean, Cm_w(:,1), tloc, 'pchip');
-    py = interp1(cumTime_mean, Cm_w(:,2), tloc, 'pchip');
-    pz = interp1(cumTime_mean, Cm_w(:,3), tloc, 'pchip');
-    set(hMean,'XData',px,'YData',py,'ZData',pz);
-
-    drawnow;
-
-    % Export snapshot
-    exportgraphics(gcf, fullfile(outDir, sprintf('3D_frame_%02d.pdf', f)), ...
-        'Resolution',600,'ContentType','image');
 end
 
 

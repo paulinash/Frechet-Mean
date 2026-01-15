@@ -30,7 +30,7 @@ e_base = 0;
 
 % ---------- PICK ONE PARAMETER TO SAMPLE ----------
 %   Options: 'a', 'b', 'c', 'd', 'e'
-paramToVary = 'd';
+paramToVary = 'e';
 
 switch paramToVary
     case 'a'
@@ -42,7 +42,7 @@ switch paramToVary
     case 'd' % sensible in (0.1,5)
         param_vals = linspace(0.1,2,5);
     case 'e'
-        param_vals = linspace(-1,1,5);
+        param_vals = linspace(-1,1,2);
     otherwise
         error('Invalid parameter name.');
 end
