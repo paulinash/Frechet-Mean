@@ -1,4 +1,4 @@
-function vdp_frechet_mean_arclength_dynamic_general
+function vdp_frechet_mean_all_parameters
 % Iterative Fréchet (Karcher) mean for periodic solutions of a **general**
 % Van-der-Pol-type system:
 %

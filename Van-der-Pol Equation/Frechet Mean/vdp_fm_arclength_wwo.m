@@ -1,4 +1,4 @@
-function vdp_frechet_mean_arclength_dynamic
+function vdp_fm_arclength_wwo
 % Iterative Fréchet (Karcher) mean for N Van-der-Pol periodic curves
 % Also extracts periods + velocities and visualizes speed via
 % moving markers (trajectories) on each curve and the mean curve.

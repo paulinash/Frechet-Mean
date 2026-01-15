@@ -1,3 +1,4 @@
+function ml_solutions
 % morris_lecar_book_form_3D_with_speed_control.m
 % Morris–Lecar model (book form):
 % - includes 2D plots

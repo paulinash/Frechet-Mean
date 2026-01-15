@@ -1,4 +1,4 @@
-function ml_frechet_mean_bursting_3D
+function ml_fm_dynamics
 % ================================================================
 % Simulates Morris-Lecar bursting for multiple applied currents.
 % Extracts the periods from each simulation using the slow variable.
@@ -11,12 +11,12 @@ function ml_frechet_mean_bursting_3D
 clear; close all; clc;
 
 %% ================= USER SETTINGS =================
-low = 45;
-high = 45.2;
+low = 44.8;
+high = 44.9;
 N = 15;
 I_vals = (high-low).*rand(N,1) + low;
 I_vals = sort(I_vals);
-I_vals = linspace(45,45.2,N);
+I_vals = linspace(low,high,N);
 useColor = true; 
 
 Tfinal = 8000;
@@ -205,7 +205,8 @@ end
 % V(t)
 figure('Color','w','Position',[100 100 1400 600]); hold on;
 for k=1:N 
-    plot(rawT{k} - rawT{k}(1),rawZ{k}(:,1), 'DisplayName', sprintf('I=%.2f', I_vals(k)),'Color',colors(k,:)); 
+    h = plot(rawT{k} - rawT{k}(1),rawZ{k}(:,1), 'DisplayName', sprintf('I=%.2f', I_vals(k)),'Color',colors(k,:)); 
+    h.Color(4) = 0.7;
 end
 plot(cumTime_mean(1:end-1), Cm_w(1:end-1,1), 'LineWidth',1.5, 'Color','k', 'DisplayName','mean');
 xlabel('t'); ylabel('V'); title('V(t) over one burst');
@@ -214,7 +215,8 @@ exportgraphics(gcf,'Figures_ml/2D_V.pdf','ContentType','vector');
 % y(t)
 figure('Color','w','Position',[100 100 1400 600]); hold on;
 for k=1:N
-    plot(rawT{k}-rawT{k}(1),rawZ{k}(:,3), 'DisplayName',sprintf('I=%.2f', I_vals(k)),'Color',colors(k,:)); 
+    h = plot(rawT{k}-rawT{k}(1),rawZ{k}(:,3), 'DisplayName',sprintf('I=%.2f', I_vals(k)),'Color',colors(k,:)); 
+    h.Color(4) = 0.7;
 end
 plot(cumTime_mean(1:end-1), Cm_w(1:end-1,3), 'LineWidth',1.5, 'Color','k','DisplayName','mean')
 xlabel('t'); ylabel('y'); title('y(t) over one burst'); 
@@ -223,7 +225,8 @@ exportgraphics(gcf,'Figures_ml/2D_y.pdf','ContentType','vector');
 % w(t)
 figure('Color','w','Position',[100 100 1400 600]); hold on;
 for k=1:N
-    plot(rawT{k}-rawT{k}(1),rawZ{k}(:,2), 'DisplayName',sprintf('I=%.2f', I_vals(k)),'Color',colors(k,:)); 
+    h=plot(rawT{k}-rawT{k}(1),rawZ{k}(:,2), 'DisplayName',sprintf('I=%.2f', I_vals(k)),'Color',colors(k,:)); 
+    h.Color(4) = 0.7;
 end
 plot(cumTime_mean(1:end-1), Cm_w(1:end-1,2), 'LineWidth',1.5, 'Color','k','DisplayName','mean')
 xlabel('t'); ylabel('y'); title('w(t) over one burst'); 
@@ -239,8 +242,12 @@ for k=1:N
         'LineWidth',1.2,'DisplayName',sprintf('I=%.2f', I_vals(k))); 
     h.Color(4) = 0.3;
 end
-plot3(meanC(:,1),meanC(:,2),meanC(:,3),'k','LineWidth',3, 'DisplayName','mean curve');
+plot3([meanC(:,1);meanC(1,1)],[meanC(:,2);meanC(1,2)],[meanC(:,3);meanC(1,3)],'k','LineWidth',3, 'DisplayName','mean curve');
 
+xlabel('V'); ylabel('w'); zlabel('y'); 
+title('3D trajectories with mean tracker'); 
+view([-30 20]);
+exportgraphics(gcf,'Figures_ml/3D.pdf','ContentType','image','Resolution',600);
 
 % Initialize moving trackers
 hCurve = gobjects(N,1);
@@ -250,11 +257,6 @@ for k=1:N
 end
 hMean = plot3(meanC(1,1),meanC(1,2),meanC(1,3),'ok',...
     'MarkerSize',10, 'MarkerFaceColor','k','DisplayName','mean tracker');
-
-xlabel('V'); ylabel('w'); zlabel('y'); 
-title('3D trajectories with mean tracker'); 
-view([-30 20]);
-exportgraphics(gcf,'Figures_ml/3D.pdf','ContentType','image','Resolution',600);
 
 
 %% ================================================================

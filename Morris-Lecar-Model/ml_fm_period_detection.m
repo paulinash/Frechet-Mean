@@ -1,4 +1,4 @@
-function ml_frechet_mean_bursting_3D
+function ml_fm_period_detection
 % ================================================================
 % Fréchet mean for Morris-Lecar bursting
 % - Period detection on the low decline of y

@@ -1,4 +1,4 @@
-function vdp_frechet_mean_with_tracking
+function vdp_fm_time_wwo_period
 % Iterative Fréchet (Karcher) mean for Van der Pol periodic curves
 % Supports:
 %   - time parametrization WITHOUT period handling (Code G)
