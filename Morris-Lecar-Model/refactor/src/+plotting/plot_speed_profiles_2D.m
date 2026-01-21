@@ -1,4 +1,4 @@
-function hfig = plot_speed_profiles(timeInfo, meanTimeInfo, raw, colors, plotOpts)
+function hfig = plot_speed_profiles_2D(timeInfo, meanTimeInfo, raw, colors, plotOpts)
 %PLOT_SPEED_PROFILES Plot reconstructed speed profiles vs reconstructed time.
 
 arguments
@@ -34,7 +34,7 @@ end
 plot(meanTimeInfo.cumTime(1:end-1), meanTimeInfo.meanSp, 'k', 'LineWidth', 2.0, 'DisplayName', 'mean speed');
 
 xlabel('reconstructed time t (one burst)');
-ylabel('speed ||z\_dot||');
+ylabel('speed $\|\dot{z}\|$');
 title('Speed profiles vs reconstructed time');
 
 if plotOpts.export

@@ -21,13 +21,18 @@ if numel(speedVec) ~= M
     error('speedVec must have length M (number of curve samples).');
 end
 
+% Wrap curve
 posWrap = [curve; curve(1,:)];
+
+% Arc length increments
 dC = diff(posWrap, 1, 1);
 ds = sqrt(sum(dC.^2, 2));
 
+% Speed magnitudes
 sp = speedVec(:);
 sp(sp < 1e-12) = 1e-12;
 
+% Local time increments
 dt_local = ds ./ sp;
 cumTime = [0; cumsum(dt_local)];
 

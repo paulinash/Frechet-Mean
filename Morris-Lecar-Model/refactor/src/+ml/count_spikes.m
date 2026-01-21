@@ -12,6 +12,7 @@ if isempty(proms)
     return;
 end
 
+% consider only prominent spikes
 prom_thr = max(0.25*max(proms), 0.2);
 n = sum(proms >= prom_thr);
 end

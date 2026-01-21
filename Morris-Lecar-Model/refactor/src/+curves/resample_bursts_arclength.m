@@ -12,8 +12,8 @@ N = numel(raw.segT);
 curvesOut = cell(N,1);
 velsOut = cell(N,1);
 
-sqFull = linspace(0,1,M+1);
-sq = sqFull(1:end-1);
+sqFull = linspace(0,1,M+1); % common domain for all curves [0,1]
+sq = sqFull(1:end-1); % [0,1)
 info = struct();
 info.sqFull = sqFull;
 info.sq = sq;
@@ -29,20 +29,20 @@ for k = 1:N
     Vraw = [Vdot, Wdot, Ydot];
 
     % Arc length parameter s in [0,1]
-    dZ = diff(Z,1,1);
-    s = [0; cumsum(sqrt(sum(dZ.^2,2)))];
+    dZ = diff(Z,1,1); % discrete tangent vector (difference between consecutive rows)
+    s = [0; cumsum(sqrt(sum(dZ.^2,2)))]; % physical arc length
     sEnd = s(end);
     if sEnd <= 0
         error('Degenerate curve for k=%d: zero arc length.', k);
     end
-    s = s / sEnd;
+    s = s / sEnd; % normalize to [0,1]
 
-    % Interpolate to uniform arc grid
+    % Interpolate curves and velocities from time to uniform arc grid
     curvesOut{k} = [ ...
         interp1(s, Z(:,1), sq, 'pchip')', ...
         interp1(s, Z(:,2), sq, 'pchip')', ...
         interp1(s, Z(:,3), sq, 'pchip')' ...
     ];
-    velsOut{k} = interp1(s, Vraw, sq, 'pchip');
+    velsOut{k} = interp1(s, Vraw, sq, 'pchip'); % 'pchip' shape perservering cubic interpolation
 end
 end

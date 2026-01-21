@@ -28,16 +28,21 @@ for k = 1:N
     C = curves{k};
     Vv = vels{k};
 
+    % Wrap curve for periodicity
     Cw = [C; C(1,:)];
     dC = diff(Cw,1,1);
-    ds = sqrt(sum(dC.^2,2));
+    ds = sqrt(sum(dC.^2,2)); % arc length increments
 
+    % Speed magnitudes
     sp = sqrt(sum(Vv.^2,2));
     sp(sp < 1e-12) = 1e-12;
     timeInfo.speeds(k,:) = sp.';
 
+    % Local time increments (time=distance/speed)
     dt_local = ds ./ sp;
     cumt = [0; cumsum(dt_local)];
+    
+    % Rescale to period
     cumt = cumt * (periods(k) / cumt(end));
 
     timeInfo.cumTime{k} = cumt;

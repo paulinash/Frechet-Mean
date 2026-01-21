@@ -19,7 +19,6 @@ function [meanC, aligned, alignedVels, info] = mean_shift_aligned(curves, vels, 
 % Notes
 % - This is a *circular shift along the arc-length parameter* (a rotation of the
 %   parametrization), not a full reparameterization.
-% - We keep this function pure: no plotting, no file I/O, no global state.
 
 arguments
     curves (1,:) cell
@@ -69,19 +68,23 @@ info.taus = zeros(N, opts.maxIter);
 info.errors = zeros(N, opts.maxIter);
 info.meanChange = zeros(opts.maxIter,1);
 
-for iter = 1:opts.maxIter
+for iter = 1:opts.maxIter % Iterate until convergence
     mean_old = meanC;
-
+    
+    % Iterate over each curve
     for k = 1:N
-        bestErr = Inf;
-        bestTau = 0;
-        bestCurve = [];
-
+        bestErr = Inf; bestTau = 0; bestCurve = [];
+        
+        % Iterate over each possible shift
         for tau = opts.tauGrid.'
+
+            % Rotate each curve 
             sq_shifted = mod(sq + tau, 1);
+
             % Interpolate curve onto shifted grid (periodic; extrap ok because mod)
             gammaShift = interp1(sq, curves{k}, sq_shifted, 'pchip', 'extrap');
 
+            % Pointwise distance to currenct mean
             err = mean(sum((gammaShift - meanC).^2, 2));
             if err < bestErr
                 bestErr = err;
@@ -90,6 +93,7 @@ for iter = 1:opts.maxIter
             end
         end
 
+        % Choose best alignment to current mean    
         aligned{k} = bestCurve;
         sq_shifted_best = mod(sq + bestTau, 1);
         alignedVels{k} = interp1(sq, vels{k}, sq_shifted_best, 'pchip', 'extrap');
@@ -100,8 +104,10 @@ for iter = 1:opts.maxIter
         fprintf('iter %d/%d, curve %d: tau=%.4f, err=%.6g\n', iter, opts.maxIter, k, bestTau, bestErr);
     end
 
+    % Update mean using mean of optimal aligned curves
     meanC = mean(cat(3, aligned{:}), 3);
 
+    % Relative change of old to new mean
     relChange = norm(meanC(:) - mean_old(:)) / (norm(mean_old(:)) + eps);
     info.meanChange(iter) = relChange;
 
@@ -110,12 +116,12 @@ for iter = 1:opts.maxIter
         info.taus = info.taus(:,1:iter);
         info.errors = info.errors(:,1:iter);
         info.meanChange = info.meanChange(1:iter);
-        fprintf('Fr\xE9chet mean converged in %d iterations (relChange=%.3g).\n', iter, relChange);
+        fprintf('Fréchet mean converged in %d iterations (relChange=%.3g).\n', iter, relChange);
         return;
     end
 end
 
 info.nIter = opts.maxIter;
-fprintf('Fr\xE9chet mean reached maxIter=%d (last relChange=%.3g).\n', opts.maxIter, info.meanChange(end));
+fprintf('Fréchet mean reached maxIter=%d (last relChange=%.3g).\n', opts.maxIter, info.meanChange(end));
 
 end

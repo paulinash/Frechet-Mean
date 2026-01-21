@@ -1,4 +1,4 @@
-function handles = plot_timeseries(raw, meanC, meanTimeInfo, colors, plotOpts)
+function handles = plot_timeseries_2D(raw, meanC, meanTimeInfo, colors, plotOpts)
 %PLOT_TIMESERIES Plot V(t), w(t), y(t) for each burst and overlay mean.
 %
 % This keeps plotting out of the algorithm. The only "logic" here is mapping
@@ -44,11 +44,7 @@ for i = 1:3
         tloc = raw.segT{k} - raw.segT{k}(1);
         z = raw.segZ{k}(:, cols(i));
         h = plot(tloc, z, 'Color', colors(k,:), 'DisplayName', sprintf('I=%.4f', raw.I_values(k)));
-        % if alpha supported for line objects
-        try
-            h.Color(4) = 0.7;
-        catch
-        end
+        h.Color(4) = 0.35;
     end
 
     plot(tmean, Cm_w(1:end-1, cols(i)), 'k', 'LineWidth', 1.5, 'DisplayName', 'mean');

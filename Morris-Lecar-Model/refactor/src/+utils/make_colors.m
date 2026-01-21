@@ -6,9 +6,11 @@ if nargin < 2
 end
 
 if useColor
+    % Colorful sample curves
     colors = lines(N);
-    colors = 0.5*colors + 0.5; % mix with white (lighter like your original)
+    colors = 0.5*colors + 0.5; % mix with white
 else
+    % Gray sample curves
     gray = [0.75 0.75 0.75];
     colors = repmat(gray, N, 1);
 end

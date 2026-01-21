@@ -1,4 +1,4 @@
-function export_snapshots_3d(fig3D, trackers, timeInfo, meanTimeInfo, plotOpts)
+function export_snapshots_3D(fig3D, trackers, timeInfo, meanTimeInfo, plotOpts)
 %EXPORT_SNAPSHOTS_3D Export 3D snapshots with trackers at selected times.
 %
 % Inputs

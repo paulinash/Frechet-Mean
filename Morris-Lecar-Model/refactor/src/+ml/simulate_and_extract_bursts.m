@@ -10,8 +10,6 @@ function raw = simulate_and_extract_bursts(I_values, baseParams, sim)
 %   .fullT     (cell Nx1) full simulation time (optional)
 %   .fullZ     (cell Nx1) full simulation states (optional)
 %
-% Design choice:
-% - keep extraction logic here; plotting/analysis elsewhere.
 
 N = numel(I_values);
 raw = struct();
@@ -24,25 +22,28 @@ raw.fullT = cell(N,1);
 raw.fullZ = cell(N,1);
 
 % ODE options: keep defaults; you can expose this via sim.odeopts later.
-odeopts = odeset('RelTol',1e-6,'AbsTol',1e-8);
+%odeopts = odeset('RelTol',1e-6,'AbsTol',1e-8);
 
 for k = 1:N
     p = baseParams; p.I = I_values(k);
 
-    [t, Z] = ode15s(@(t,z) ml.rhs(t, z, p), sim.tspan, sim.z0, odeopts);
+    % Solve ODE RHS
+    [t, Z] = ode15s(@(t,z) ml.rhs(t, z, p), sim.tspan, sim.z0);
     raw.fullT{k} = t;
     raw.fullZ{k} = Z;
 
-    % Drop transient
+    % Remove transient
     keepIdx = t > sim.Tfinal*sim.transientFraction;
     t2 = t(keepIdx);
     Z2 = Z(keepIdx,:);
 
+    % Extract last burst period usind threshold detection
     [segT, segZ] = ml.extract_last_burst(t2, Z2);
     raw.segT{k} = segT;
     raw.segZ{k} = segZ;
     raw.periods(k) = segT(end) - segT(1);
 
+    % Test spike count consistency
     raw.spikeCounts(k) = ml.count_spikes(segZ(:,1));
 
     fprintf('I=%.4f : burst dur=%.3f, spikes=%d\n', p.I, raw.periods(k), raw.spikeCounts(k));

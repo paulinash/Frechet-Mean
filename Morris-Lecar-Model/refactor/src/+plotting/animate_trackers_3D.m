@@ -1,4 +1,4 @@
-function animate_trackers_3d(trackers, timeInfo, meanTimeInfo, plotOpts)
+function animate_trackers_3D(trackers, timeInfo, meanTimeInfo, plotOpts)
 %ANIMATE_TRACKERS_3D Live animation of trackers moving along curves.
 %
 % This is intentionally isolated because it is a "long-running" loop and often
@@ -11,13 +11,15 @@ function animate_trackers_3d(trackers, timeInfo, meanTimeInfo, plotOpts)
 %   .dt_play (default 0.02)
 %   .speed_factor (default 20)
 %
-% Stop with Ctrl+C.
+% Stop with Ctrl+C. or wait maxSeconds time
 
 if nargin < 4
     plotOpts = struct();
 end
 if ~isfield(plotOpts,'dt_play'), plotOpts.dt_play = 0.02; end
 if ~isfield(plotOpts,'speed_factor'), plotOpts.speed_factor = 20; end
+if ~isfield(plotOpts,'maxSeconds'), plotOpts.maxSeconds = 30; end
+ 
 
 fprintf('Animation running... Press Ctrl+C to stop.\n');
 
@@ -26,8 +28,16 @@ t_global = 0;
 
 dt_play = plotOpts.dt_play;
 speed_factor = plotOpts.speed_factor;
+maxSeconds = plotOpts.maxSeconds;
+
+tStart = tic; % Start timer
 
 while true
+    if toc(tStart) >= maxSeconds
+        fprintf('Animation stopped after %.1f seconds.\n', toc(tStart));
+        break;
+    end
+
     t_global = t_global + speed_factor*dt_play;
 
     for k = 1:N
