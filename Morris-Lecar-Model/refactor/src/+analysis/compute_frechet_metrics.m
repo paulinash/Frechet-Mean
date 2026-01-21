@@ -35,6 +35,7 @@ dopts.allowShift = opts.pairwise.allowShift;
 dopts.tauGrid    = opts.pairwise.tauGrid;
 dopts.interp     = opts.pairwise.interp;
 
+%% THIS LOOP DOES NOT SCALE WELL
 k = 0;
 for i = 1:N
     for j = i+1:N

@@ -26,7 +26,7 @@ h.figDistToMean = figure('Color','w','Name','Distances to mean','Position',[200 
 histogram(metrics.dist.toMean, metrics.modality.edges);
 grid on;
 xlabel('$d(C_i, \mu)$'); ylabel('count');
-title('Distances to Fréchet mean', 'Interpreter','latex');
+title('Distances to Fr\´echet mean', 'Interpreter','latex');
 
 % show modality classification
 txt = sprintf('Modality: %s (peaks=%d)', string(metrics.modality.class), metrics.modality.numPeaks);
