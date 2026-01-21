@@ -68,6 +68,8 @@ info.taus = zeros(N, opts.maxIter);
 info.errors = zeros(N, opts.maxIter);
 info.meanChange = zeros(opts.maxIter,1);
 
+
+%% Fréchet mean iteration
 for iter = 1:opts.maxIter % Iterate until convergence
     mean_old = meanC;
     
