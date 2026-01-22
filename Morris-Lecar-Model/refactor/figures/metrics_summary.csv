@@ -1,0 +1,2 @@
+N,d_to_mean_mean,d_to_mean_std,d_to_mean_min,d_to_mean_max,frechetVar,pairwise_mean,ratio_meanToMeanPairwise,modality_class,modality_peaks,kappa_rms_meanCurve,kappa_rms_medianSamples,kappa_rms_iqrSamples,bend_meanCurve,bend_medianSamples,bend_iqrSamples
+10,8.21647051250104,1.85712155569255,6.44132696087233,10.6160458446528,70.6143981081553,155.839929726191,0.453121342086228,unimodal,1,0.00190357368006152,0.0018386239404071,3.4438381655231e-05,0.00200042984279788,0.00207869617612733,2.29926746135273e-05

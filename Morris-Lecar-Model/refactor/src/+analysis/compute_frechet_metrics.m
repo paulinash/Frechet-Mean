@@ -16,16 +16,16 @@ opts = fill_defaults(opts);
 
 N = numel(curvesAligned);
 
-% --- Distances to mean ---
+%% Distance: aligned curves to mean curve 
 d_to_mean = zeros(N,1);
 for i = 1:N
     d_to_mean(i) = analysis.curve_distance(curvesAligned{i}, meanC);
 end
 
-% Fréchet variance (empirical): mean squared distance to mean
+%% Fréchet variance (empirical): mean squared distance to mean
 frechetVar = mean(d_to_mean.^2);
 
-% --- Pairwise distances (subsample if large) ---
+%% Pairwise distances (subsample if large)
 np = N*(N-1)/2;
 pairwiseD = zeros(np,1);
 pairs = zeros(np,2);
@@ -35,7 +35,6 @@ dopts.allowShift = opts.pairwise.allowShift;
 dopts.tauGrid    = opts.pairwise.tauGrid;
 dopts.interp     = opts.pairwise.interp;
 
-%% THIS LOOP DOES NOT SCALE WELL
 k = 0;
 for i = 1:N
     for j = i+1:N
@@ -44,20 +43,14 @@ for i = 1:N
         pairwiseD(k) = analysis.curve_distance(curvesAligned{i}, curvesAligned{j}, dopts);
     end
 end
+avgPairwise = mean(pairwiseD.^2);
 
-% Compare scale: average pairwise distance vs mean distance to mean
-avgPairwise = mean(pairwiseD);
-avgToMean   = mean(d_to_mean);
 
-% A common identity in Euclidean settings: mean pairwise squared distance
-% relates to variance. Not exact for arbitrary metrics, but still useful
-% as a consistency check:
-avgPairwiseSq = mean(pairwiseD.^2);
 
-% --- Modality check of d_to_mean distribution ---
+%% --- Modality check of d_to_mean distribution ---
 modality = analysis.modality_from_hist(d_to_mean, opts.modality);
 
-% --- Curvature / smoothness metrics (mean vs samples) ---
+%% --- Curvature / smoothness metrics (mean vs samples) ---
 [curvMean, curvSamples] = analysis.curvature_metrics(meanC, curvesAligned, opts.curvature);
 
 % --- Optional: FM iteration diagnostics if available ---
@@ -71,19 +64,12 @@ metrics.N = N;
 
 metrics.dist = struct();
 metrics.dist.toMean = d_to_mean;
-metrics.dist.mean = avgToMean;
-metrics.dist.var = var(d_to_mean);
 metrics.dist.frechetVar = frechetVar;
 
 metrics.pairwise = struct();
 metrics.pairwise.d = pairwiseD;
-metrics.pairwise.pairs = pairs;
 metrics.pairwise.mean = avgPairwise;
-metrics.pairwise.meanSq = avgPairwiseSq;
-
-metrics.sanity = struct();
-metrics.sanity.ratio_meanToMeanPairwise = avgToMean / avgPairwise;  % scale check
-metrics.sanity.ratio_varToPairwiseSq    = frechetVar / avgPairwiseSq;
+metrics.pairwise.ratio_meanToMeanPairwise = frechetVar / avgPairwise;  % scale check
 
 metrics.modality = modality;
 
