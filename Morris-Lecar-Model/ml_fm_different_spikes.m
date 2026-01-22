@@ -23,7 +23,7 @@ set(groot, ...
     'DefaultFigureColor','w');
 %% ================= USER SETTINGS =================
 low = 44.8;
-high = 44.9;
+high = 45.3;
 N = 8;
 I_vals = (high-low).*rand(N,1) + low;
 I_vals = sort(I_vals);

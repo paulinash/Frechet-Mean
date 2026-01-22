@@ -26,18 +26,45 @@ end
 frechetVar = mean(d_to_mean.^2);
 
 %% Pairwise distances (subsample if large)
-np = N*(N-1)/2;
-pairwiseD = zeros(np,1);
-pairs = zeros(np,2);
+npTotal = N*(N-1)/2;
+maxPairs = 200;
 
 dopts = struct();
 dopts.allowShift = opts.pairwise.allowShift;
 dopts.tauGrid    = opts.pairwise.tauGrid;
 dopts.interp     = opts.pairwise.interp;
 
-k = 0;
-for i = 1:N
-    for j = i+1:N
+if npTotal <= maxPairs
+    % --- compute all pairs ---
+    pairwiseD = zeros(npTotal,1);
+    pairs = zeros(npTotal,2);
+
+    k = 0;
+    for i = 1:N
+        for j = i+1:N
+            k = k + 1;
+            pairs(k,:) = [i j];
+            pairwiseD(k) = analysis.curve_distance(curvesAligned{i}, curvesAligned{j}, dopts);
+        end
+    end
+else
+    % --- randomly subsample maxPairs unordered pairs ---
+    pairwiseD = zeros(maxPairs,1);
+    pairs = zeros(maxPairs,2);
+
+    k = 0;
+    while k < maxPairs
+        i = randi(N); j = randi(N);
+        if i == j
+            continue;
+        end
+        if i > j
+            tmp = i; i = j; j = tmp;
+        end
+        % avoid duplicates
+        if k > 0 && any(pairs(1:k,1) == i & pairs(1:k,2) == j)
+            continue;
+        end
         k = k + 1;
         pairs(k,:) = [i j];
         pairwiseD(k) = analysis.curve_distance(curvesAligned{i}, curvesAligned{j}, dopts);
@@ -50,6 +77,8 @@ avgPairwise = mean(pairwiseD.^2);
 %% --- Modality check of d_to_mean distribution ---
 modality = analysis.modality_from_hist(d_to_mean, opts.modality);
 
+
+%%% TODO:  CHECK FROM HERE ONWARDS
 %% --- Curvature / smoothness metrics (mean vs samples) ---
 [curvMean, curvSamples] = analysis.curvature_metrics(meanC, curvesAligned, opts.curvature);
 

@@ -20,13 +20,24 @@ else
     countsSm = counts;
 end
 
-% find peaks (simple)
+% Find interior peaks
 peaks = [];
 for i = 2:numel(countsSm)-1
     if countsSm(i) > countsSm(i-1) && countsSm(i) > countsSm(i+1)
-        peaks(end+1) = i; %#ok<AGROW>
+        peaks(end+1) = i;
     end
 end
+
+% Find edge peaks
+if numel(countsSm) >= 2
+    if countsSm(1) > countsSm(2)
+        peaks = [1 peaks];
+    end
+    if countsSm(end) > countsSm(end-1)
+        peaks = [peaks numel(countsSm)];
+    end
+end
+
 
 out = struct();
 out.edges = edges;

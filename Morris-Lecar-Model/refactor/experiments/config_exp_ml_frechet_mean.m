@@ -13,8 +13,8 @@ S = struct();
 
 %% I sweep
 S.I.low = 44.8;
-S.I.high = 45.5;
-S.I.N = 10;
+S.I.high = 45.4;
+S.I.N = 100;
 S.I.values = linspace(S.I.low, S.I.high, S.I.N);
 
 %% Simulation
@@ -61,5 +61,7 @@ S.metrics.pairwise = struct();
 S.metrics.pairwise.allowShift = true;
 S.metrics.pairwise.tauGrid = S.fm.tauGrid;     % reuse the same grid
 S.metrics.pairwise.interp = "pchip";
+S.metrics.modality.numBins = 30;
+S.metrics.modality.smoothSigma = 0.0;
 
 end

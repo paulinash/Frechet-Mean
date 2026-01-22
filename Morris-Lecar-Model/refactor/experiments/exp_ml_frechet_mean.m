@@ -1,7 +1,6 @@
 function out = exp_ml_frechet_mean()
 %EXP_ML_FRECHET_MEAN Morris–Lecar bursting + (shift-aligned) Fréchet mean.
 %
-% This is an experiment runner: keep it short. Put algorithms in src/.
 %
 close all; clc;
 
