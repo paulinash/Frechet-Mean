@@ -60,44 +60,71 @@ if plotOpts.export
 end
 
 
-%% 3) Curvature comparison
-N = metrics.N;
-kMean = metrics.curvature.mean.kappa_rms;
+%% plot kappa
+% Plot kappa vectors: all samples + mean
+kappa_meanC = metrics.curvature.mean.kappa;   % (M-2) x 1
+S = metrics.curvature.samples;                % struct array N x 1
+N = numel(S);
 
-kSamp = zeros(N,1);
-bendSamp = zeros(N,1);
+figure();
+% plot sample kappas
 for i = 1:N
-    kSamp(i) = metrics.curvature.samples(i).kappa_rms;
-    bendSamp(i) = metrics.curvature.samples(i).bending_energy;
+    subplot(N,1,i);
+    plot(S(i).kappa, 'k-');   % default color; can look busy
 end
 
+% plot mean kappa on top
+subplot(N,1,N);
+plot(kappa_meanC, 'r-', 'LineWidth', 2);
+
+grid on;
+xlabel('index along curve (approx arc-length samples)');
+ylabel('\kappa');
+title('Curvature \kappa(s): samples (thin) and Fréchet mean (thick)');
+
+
+%% 3) Curvature metrics comparison
+N = metrics.N;
+kappa_mean_meanC = metrics.curvature.mean.kappa_mean;
+kappa_mean_samples = arrayfun(@(s) s.kappa_mean, metrics.curvature.samples);
+kappa_rms_meanC = metrics.curvature.mean.kappa_rms;
+kappa_rms_samples = arrayfun(@(s) s.kappa_rms, metrics.curvature.samples);
+total_curvature_meanC = metrics.curvature.mean.total_curvature;
+total_curvature_samples = arrayfun(@(s) s.total_curvature, metrics.curvature.samples);
+bending_energy_meanC = metrics.curvature.mean.bending_energy;
+bending_energy_samples = arrayfun(@(s) s.bending_energy, metrics.curvature.samples);
+second_differences_meanC = metrics.curvature.mean.second_diff_rms;
+second_differences_samples = arrayfun(@(s) s.second_diff_rms, metrics.curvature.samples);
+
+samples_list = {kappa_mean_samples, kappa_rms_samples, total_curvature_samples, bending_energy_samples, second_differences_samples};
+meanC_list = [kappa_mean_meanC, kappa_rms_meanC, total_curvature_meanC, bending_energy_meanC, second_differences_meanC];
+title_list = {'Mean curvature', 'RMS curvature', 'Total curvature', 'Bending energy', 'Second differences'};
+y_label_list = {'Mean ($\kappa$)', 'RMS ($\kappa$)', '$\int \kappa ds$', '$\int \kappa^2 ds$', 'Second differences RMS'};
+
 h.figCurvature = figure('Color','w','Name','Curvature summary','Position',[280 140 920 520]);
-
-subplot(1,2,1);
-boxplot(kSamp);
-hold on;
-plot(1, kMean, 'rx', 'MarkerSize', 10, 'LineWidth', 2);
-grid on;
-title('RMS curvature');
-ylabel('RMS($\kappa$)');
-ax = gca;
-ax.TickLabelInterpreter = 'latex';
-set(ax,'XTickLabel',{'samples'});
-
-subplot(1,2,2);
-boxplot(bendSamp);
-hold on;
-plot(1, metrics.curvature.mean.bending_energy, 'rx', 'MarkerSize', 10, 'LineWidth', 2);
-grid on;
-title('Bending energy');
-ylabel('$\int \kappa^2 ds$');
-ax = gca;
-ax.TickLabelInterpreter = 'latex';
-set(ax,'XTickLabel',{'samples'});
+for counter=1:numel(samples_list)
+    plot_curvature_boxplot(meanC_list(counter), samples_list{counter}, title_list{counter}, y_label_list{counter}, counter)
+end
 
 if plotOpts.export
     exportgraphics(h.figCurvature, fullfile(plotOpts.outDir, "metrics_curvature.pdf"), ...
         'ContentType','image', 'Resolution', 600);
 end
 
+end
+
+function plot_curvature_boxplot(meanC, samples, title_bp, y_label, counter)
+subplot(2,3,counter);
+boxplot(samples, 'Symbol', 'k.');
+hold on;
+plot(1, meanC, 'rx', 'MarkerSize', 10, 'LineWidth', 2);
+grid on;
+title(title_bp, 'Interpreter','none');
+ylabel(y_label, 'Interpreter','latex');
+ax = gca;
+ax.TickLabelInterpreter = 'latex';
+set(ax,'XTickLabel',{'samples'});
+ymin = min([samples(:); meanC]);
+ymax = max([samples(:); meanC]);
+ylim([0.9*ymin, 1.1*ymax]);
 end

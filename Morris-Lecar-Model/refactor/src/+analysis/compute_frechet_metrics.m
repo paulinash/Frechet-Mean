@@ -78,9 +78,8 @@ avgPairwise = mean(pairwiseD.^2);
 modality = analysis.modality_from_hist(d_to_mean, opts.modality);
 
 
-%%% TODO:  CHECK FROM HERE ONWARDS
 %% --- Curvature / smoothness metrics (mean vs samples) ---
-[curvMean, curvSamples] = analysis.curvature_metrics(meanC, curvesAligned, opts.curvature);
+[curvatureMean, curvatureSamples] = analysis.curvature_metrics(meanC, curvesAligned, opts.curvature);
 
 % --- Optional: FM iteration diagnostics if available ---
 fmDiag = struct();
@@ -103,8 +102,8 @@ metrics.pairwise.ratio_meanToMeanPairwise = frechetVar / avgPairwise;  % scale c
 metrics.modality = modality;
 
 metrics.curvature = struct();
-metrics.curvature.mean = curvMean;
-metrics.curvature.samples = curvSamples;
+metrics.curvature.mean = curvatureMean;
+metrics.curvature.samples = curvatureSamples;
 
 metrics.fm = fmDiag;
 

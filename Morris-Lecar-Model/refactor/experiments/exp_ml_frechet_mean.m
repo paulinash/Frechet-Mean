@@ -13,6 +13,7 @@ S = config_exp_ml_frechet_mean(string(projectRoot));
 %% Model parameters
 p0 = ml.model_params();
 
+
 %% Pipeline
 % 1) simulate and extract one burst per sample of I
 N = numel(S.I.values);
