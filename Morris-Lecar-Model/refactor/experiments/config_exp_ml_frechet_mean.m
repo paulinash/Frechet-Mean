@@ -13,7 +13,7 @@ S = struct();
 
 %% I sweep
 S.I.low = 44.8;
-S.I.high = 44.92;
+S.I.high = 44.9;
 S.I.N = 5;
 S.I.values = linspace(S.I.low, S.I.high, S.I.N);
 
