@@ -38,6 +38,6 @@ ylabel('speed $\|\dot{z}\|$');
 title('Speed profiles vs reconstructed time');
 
 if plotOpts.export
-    exportgraphics(hfig, fullfile(plotOpts.outDir, "speed_vs_time.pdf"), 'ContentType','vector');
+    exportgraphics(hfig, fullfile(plotOpts.outDir, "speed_vs_time.pdf"), 'ContentType','image', 'Resolution',600);
 end
 end

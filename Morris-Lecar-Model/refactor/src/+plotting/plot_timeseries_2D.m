@@ -53,7 +53,7 @@ for i = 1:3
     title(titles{i});
 
     if plotOpts.export
-        exportgraphics(handles.fig(i), fullfile(plotOpts.outDir, fileTags{i} + ".pdf"), 'ContentType','vector');
+        exportgraphics(handles.fig(i), fullfile(plotOpts.outDir, fileTags{i} + ".pdf"), 'ContentType','image', 'Resolution',600);
     end
 end
 

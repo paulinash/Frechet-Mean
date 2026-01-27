@@ -79,7 +79,19 @@ modality = analysis.modality_from_hist(d_to_mean, opts.modality);
 
 
 %% --- Curvature / smoothness metrics (mean vs samples) ---
-[curvatureMean, curvatureSamples] = analysis.curvature_metrics(meanC, curvesAligned, opts.curvature);
+% correspondence parametrization ( for plotting curvature only!)
+[curvMean_corr, curvSamples_corr] = analysis.curvature_metrics(meanC, curvesAligned, opts.curvature);
+
+% arc length parametrization (for metrics use)
+M = size(meanC, 1);                    
+
+meanC_al = resample_uniform_arclength(meanC, M, opts.curvature.eps);
+curvesAligned_al = curvesAligned;
+for i = 1:N
+    curvesAligned_al{i} = resample_uniform_arclength(curvesAligned{i}, M, opts.curvature.eps);
+end
+[curvMean_al, curvSamples_al] = analysis.curvature_metrics(meanC_al, curvesAligned_al, opts.curvature);
+
 
 % --- Optional: FM iteration diagnostics if available ---
 fmDiag = struct();
@@ -102,8 +114,8 @@ metrics.pairwise.ratio_meanToMeanPairwise = frechetVar / avgPairwise;  % scale c
 metrics.modality = modality;
 
 metrics.curvature = struct();
-metrics.curvature.mean = curvatureMean;
-metrics.curvature.samples = curvatureSamples;
+metrics.curvature.corr   = struct('mean', curvMean_corr, 'samples', curvSamples_corr);
+metrics.curvature.arclen = struct('mean', curvMean_al,   'samples', curvSamples_al);
 
 metrics.fm = fmDiag;
 
@@ -135,4 +147,27 @@ if ~isfield(opts.modality,'smoothSigma'), opts.modality.smoothSigma = 1.0; end
 if ~isfield(opts,'curvature'), opts.curvature = struct(); end
 if ~isfield(opts.curvature,'eps'), opts.curvature.eps = 1e-12; end
 
+end
+
+
+
+function C_u = resample_uniform_arclength(C, Mnew, eps0)
+%RESAMPLE_UNIFORM_ARCLENGTH_Md Resample an M x d curve to uniform arc length.
+
+assert(isnumeric(C) && ismatrix(C), 'C must be numeric MxD.');
+M = size(C,1);
+assert(M >= 2, 'Need at least 2 points to resample.');
+
+dC = diff(C, 1, 1);                      % (M-1) x d
+ds = sqrt(sum(dC.^2, 2)) + eps0;         % (M-1) x 1
+s  = [0; cumsum(ds)];                    % M x 1
+L  = s(end);
+
+if L < eps0
+    C_u = repmat(C(1,:), Mnew, 1);       % Mnew x d
+    return;
+end
+
+s_new = linspace(0, L, Mnew).';
+C_u = interp1(s, C, s_new, 'pchip');     % Mnew x d
 end

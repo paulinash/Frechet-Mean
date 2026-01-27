@@ -41,7 +41,6 @@ meanTimeInfo.posWrap = meanPosWrap;
 %% Metrics
 % Geometric Fréchet mean metrics analysis
 metrics = analysis.compute_frechet_metrics(aligned, meanC, arc, fmInfo, S.metrics);
-analysis.print_metrics_summary(metrics);
 analysis.export_metrics_table(metrics, S.export)
 
 %% Collect outputs
@@ -67,17 +66,22 @@ utils.apply_style(S.plot);
 colors = utils.make_colors(N, S.plot.useColor);
  
 % Plotting metrics
-plotting.plot_metrics_summary(metrics, S.export);
-
-% Plotting 2D and 3D trajectories
-plotting.plot_timeseries_2D(raw, meanC, meanTimeInfo, colors, S.export);
-plotting.plot_speed_profiles_2D(timeInfo, meanTimeInfo, raw, colors, S.export);
-
-h = plotting.plot_trajectories_3D(aligned, meanC, raw, colors, S.export);
-
-if S.export.snapshot
-    plotting.export_snapshots_3D(h.fig, h.trackers, timeInfo, meanTimeInfo, S.export);
+if S.plot.metrics
+    plotting.plot_metrics_summary(metrics, S.export);
 end
 
-plotting.animate_trackers_3D(h.trackers, timeInfo, meanTimeInfo, S.anim);
+
+% Plotting 2D and 3D trajectories
+if S.plot.trajectories
+    plotting.plot_timeseries_2D(raw, meanC, meanTimeInfo, colors, S.export);
+    plotting.plot_speed_profiles_2D(timeInfo, meanTimeInfo, raw, colors, S.export);
+
+    h = plotting.plot_trajectories_3D(aligned, meanC, raw, colors, S.export);
+
+    if S.export.snapshot
+        plotting.export_snapshots_3D(h.fig, h.trackers, timeInfo, meanTimeInfo, S.export);
+    end
+
+    plotting.animate_trackers_3D(h.trackers, timeInfo, meanTimeInfo, S.anim);
+end
 end
