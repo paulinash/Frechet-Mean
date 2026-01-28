@@ -1,7 +1,10 @@
-function T = export_metrics_table(metrics, plotOpts)
-%EXPORT_METRICS_TABLE Export key metrics summary as CSV and a table figure (PDF/PNG).
+function Tlong = export_metrics_table(metrics, plotOpts)
+%EXPORT_METRICS_TABLE Export key metrics summary as a grouped Excel table.
 %
-% Returns table T.
+% Output:
+%   - writes metrics_summary.xlsx in plotOpts.outDir (default "figures")
+% Returns:
+%   Tlong: table with columns Group, Name, Value
 
 arguments
     metrics (1,1) struct
@@ -16,72 +19,118 @@ if plotOpts.export && ~isfolder(plotOpts.outDir)
     mkdir(plotOpts.outDir);
 end
 
-% --- build a compact summary table (1 row) ---
+% --- row builders ---
+Group = strings(0,1);
+Name  = strings(0,1);
+Value = strings(0,1);
+
+add = @(g,n,v) addRow(g,n,v);
+
+    function addRow(g,n,v)
+        Group(end+1,1) = string(g);
+        Name(end+1,1)  = string(n);
+        Value(end+1,1) = toStr(v);
+    end
+
+    function s = toStr(v)
+        if isstring(v) || ischar(v)
+            s = string(v);
+        elseif islogical(v)
+            s = string(v);
+        elseif isnumeric(v)
+            if isscalar(v)
+                s = string(v);
+            else
+                % keep non-scalars compact
+                s = string(mat2str(v, 6));
+            end
+        else
+            s = string(v);
+        end
+    end
+
+addHeader = @(g) addRow(g, upper(string(g)), "");  % group header row
+addBlank  = @() addRow("", "", "");                % blank separator row
+
+% --- build rows ---
 d = metrics.dist.toMean;
-pw = metrics.pairwise.d;
 
+% BASIC
+addHeader("Basic");
+add("Basic","N", metrics.N);
+add("Basic","d_to_mean_mean", mean(d));
+add("Basic","d_to_mean_std",  std(d));
+add("Basic","d_to_mean_min",  min(d));
+add("Basic","d_to_mean_max",  max(d));
+add("Basic","frechetVar", metrics.dist.frechetVar);
+add("Basic","pairwise_mean_sq", metrics.pairwise.mean);
+add("Basic","ratio_meanToMeanPairwise", metrics.pairwise.ratio_meanToMeanPairwise);
+addBlank();
 
-T = table();
-T.N = metrics.N;
+% MEDOID
+addHeader("Medoid");
+add("Medoid","medoid_idx", metrics.medoid.idx);
+add("Medoid","frechetVar_medoid", metrics.medoid.cost);
+add("Medoid","distance_Fmedoid_Fmean", metrics.medoid.d_to_mean);
+add("Medoid","ratio_FVmedoid_FVmean", metrics.medoid.varRatio);
+addBlank();
 
-T.d_to_mean_mean = mean(d);
-T.d_to_mean_std  = std(d);
-T.d_to_mean_min  = min(d);
-T.d_to_mean_max  = max(d);
+% MODALITY
+addHeader("Modality");
+add("Modality","modality_class", string(metrics.modality.class));
+add("Modality","modality_peaks", metrics.modality.numPeaks);
+addBlank();
 
-T.frechetVar = metrics.dist.frechetVar;
-T.pairwise_mean = metrics.pairwise.mean;
-T.ratio_meanToMeanPairwise = metrics.pairwise.ratio_meanToMeanPairwise;
+% CURVATURE
+addHeader("Curvature");
+add("Curvature","kappa_mean_meanC", metrics.curvature.arclen.mean.kappa_mean);
+add("Curvature","kappa_rms_meanC", metrics.curvature.arclen.mean.kappa_rms);
+add("Curvature","total_curvature_meanC", metrics.curvature.arclen.mean.total_curvature);
+add("Curvature","bending_energy_meanC", metrics.curvature.arclen.mean.bending_energy);
+add("Curvature","total_variation_meanC", metrics.curvature.arclen.mean.kappa_total_variation);
+add("Curvature","second_difference_energy_meanC", metrics.curvature.arclen.mean.kappa_second_difference_energy);
 
-%% Medoid
-T.frechetVar_medoid = metrics.medoid.cost;
-T.distance_Fmedoid_Fmean = metrics.medoid.d_to_mean;
-T.ratio_FVmedoid_FVmean = metrics.medoid.varRatio;
+% sample stats means
+S = metrics.curvature.arclen.samples;
+kappa_mean_samples = arrayfun(@(s) s.kappa_mean, S);
+kappa_rms_samples  = arrayfun(@(s) s.kappa_rms,  S);
+total_curv_samples = arrayfun(@(s) s.total_curvature, S);
+bendE_samples      = arrayfun(@(s) s.bending_energy, S);
+totVar_samples     = arrayfun(@(s) s.kappa_total_variation, S);
+secDiff_samples    = arrayfun(@(s) s.kappa_second_difference_energy, S);
 
-%% Modality
-T.modality_class = string(metrics.modality.class);
-T.modality_peaks = metrics.modality.numPeaks;
+kmS = mean(kappa_mean_samples);
+krS = mean(kappa_rms_samples);
+tcS = mean(total_curv_samples);
+beS = mean(bendE_samples);
+tvS = mean(totVar_samples);
+sdS = mean(secDiff_samples);
 
-%% Curvature
-%curvature stats of mean curve
-T.kappa_mean_meanC = metrics.curvature.arclen.mean.kappa_mean;
-T.kappa_rms_meanC = metrics.curvature.arclen.mean.kappa_rms;
-T.total_curvature_meanC = metrics.curvature.arclen.mean.total_curvature;
-T.bending_energy_meanC = metrics.curvature.arclen.mean.bending_energy;
-T.total_variation_meanC = metrics.curvature.arclen.mean.kappa_total_variation;
-T.second_difference_energy_meanC = metrics.curvature.arclen.mean.kappa_second_difference_energy;
+add("Curvature","kappa_mean_meanSamples", kmS);
+add("Curvature","kappa_rms_meanSamples",  krS);
+add("Curvature","total_curvature_meanSamples", tcS);
+add("Curvature","bending_energy_meanSamples",  beS);
+add("Curvature","total_variation_meanSamples", tvS);
+add("Curvature","second_difference_energy_meanSamples", sdS);
 
-% --- curvature sample curves arrays ---
-kappa_mean_samples = arrayfun(@(s) s.kappa_mean, metrics.curvature.arclen.samples);
-kappa_rms_samples = arrayfun(@(s) s.kappa_rms, metrics.curvature.arclen.samples);
-total_curvature_samples = arrayfun(@(s) s.total_curvature, metrics.curvature.arclen.samples);
-bending_energy_samples = arrayfun(@(s) s.bending_energy, metrics.curvature.arclen.samples);
-total_variation_samples = arrayfun(@(s) s.kappa_total_variation, metrics.curvature.arclen.samples);
-second_diff_energy_samples = arrayfun(@(s) s.kappa_second_difference_energy, metrics.curvature.arclen.samples);
+% ratios
+add("Curvature","kappa_mean_ratio", metrics.curvature.arclen.mean.kappa_mean / kmS);
+add("Curvature","kappa_rms_ratio",  metrics.curvature.arclen.mean.kappa_rms  / krS);
+add("Curvature","total_curvature_ratio", metrics.curvature.arclen.mean.total_curvature / tcS);
+add("Curvature","bending_energy_ratio",  metrics.curvature.arclen.mean.bending_energy / beS);
+add("Curvature","total_variation_ratio", metrics.curvature.arclen.mean.kappa_total_variation / tvS);
+add("Curvature","second_diff_ratio",     metrics.curvature.arclen.mean.kappa_second_difference_energy / sdS);
 
-% mean of curvature stats of sample curves
-T.kappa_mean_meanSamples = mean(kappa_mean_samples);
-T.kappa_rms_meanSamples = mean(kappa_rms_samples);
-T.total_curvature_meanSamples = mean(total_curvature_samples);
-T.bending_energy_meanSamples = mean(bending_energy_samples);
-T.total_variation_meanSamples = mean(total_variation_samples);
-T.second_difference_energy_meanSamples = mean(second_diff_energy_samples);
-
-% Ratios
-T.kappa_mean_ratio = T.kappa_mean_meanC/T.kappa_mean_meanSamples;
-T.kappa_rms_ratio = T.kappa_rms_meanC / T.kappa_rms_meanSamples;
-T.total_curvature_ratio = T.total_curvature_meanC  / T.total_curvature_meanSamples;
-T.bending_energy_ratio = T.bending_energy_meanC / T.bending_energy_meanSamples;
-T.total_variation_ratio = T.total_variation_meanC / T.total_variation_meanSamples;
-T.second_diff_ratio = T.second_difference_energy_meanC / T.second_difference_energy_meanSamples;
-
-
+% --- output table ---
+Tlong = table(Group, Name, Value);
 
 if ~plotOpts.export
     return;
 end
 
-% --- export CSV ---
-writetable(T, fullfile(plotOpts.outDir, "metrics_summary.csv"));
+outPath = fullfile(plotOpts.outDir, "metrics_summary.xlsx");
+
+% Write to Excel
+writetable(Tlong, outPath, 'FileType','spreadsheet', 'Sheet', 'Summary');
 
 end
