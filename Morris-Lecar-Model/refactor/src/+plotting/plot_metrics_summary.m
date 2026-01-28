@@ -35,6 +35,9 @@ title(ax1,'Distances to Frechet mean', 'Interpreter','latex');
 txt = sprintf('Modality: %s (peaks=%d)', string(metrics.modality.class), metrics.modality.numPeaks);
 y = ylim(ax1); x = xlim(ax1);
 text(ax1, x(1) + 0.05*(x(2)-x(1)), y(1) + 0.90*(y(2)-y(1)), txt);
+hold(ax1,'off');
+
+
 
 % b) Pairwise distance histogram
 ax2 = nexttile(t,2);
@@ -72,7 +75,6 @@ if plotOpts.export
 end
 
 %  b) Curvature metrics comparison
-N = metrics.N;
 kappa_mean_meanC = metrics.curvature.arclen.mean.kappa_mean;
 kappa_mean_samples = arrayfun(@(s) s.kappa_mean, metrics.curvature.arclen.samples);
 kappa_rms_meanC = metrics.curvature.arclen.mean.kappa_rms;

@@ -25,14 +25,38 @@ end
 %% Fréchet variance (empirical): mean squared distance to mean
 frechetVar = mean(d_to_mean.^2);
 
-%% Pairwise distances (subsample if large)
-npTotal = N*(N-1)/2;
-maxPairs = 200;
-
+% opts for Frechet medoid and pairwise distances
 dopts = struct();
 dopts.allowShift = opts.pairwise.allowShift;
 dopts.tauGrid    = opts.pairwise.tauGrid;
 dopts.interp     = opts.pairwise.interp;
+
+%% Pairwise distances and Frechet medoid
+D = nan(N,N);          %  distance matrix
+D(1:N+1:end) = 0;      % diagonal = 0
+
+% nested helper function
+function dij = getDist(i,j)
+    if i == j
+        dij = 0;
+        return;
+    end
+    if i > j
+        tmp=i; i=j; j=tmp;
+    end
+    if ~isnan(D(i,j))
+        dij = D(i,j);
+        return;
+    end
+    dij = analysis.curve_distance(curvesAligned{i}, curvesAligned{j}, dopts);
+    D(i,j) = dij;
+    D(j,i) = dij;
+end
+
+% Pairwise distance
+npTotal = N*(N-1)/2;
+maxPairs = 200;
+
 
 if npTotal <= maxPairs
     % --- compute all pairs ---
@@ -44,7 +68,7 @@ if npTotal <= maxPairs
         for j = i+1:N
             k = k + 1;
             pairs(k,:) = [i j];
-            pairwiseD(k) = analysis.curve_distance(curvesAligned{i}, curvesAligned{j}, dopts);
+            pairwiseD(k) = getDist(i,j);
         end
     end
 else
@@ -67,10 +91,50 @@ else
         end
         k = k + 1;
         pairs(k,:) = [i j];
-        pairwiseD(k) = analysis.curve_distance(curvesAligned{i}, curvesAligned{j}, dopts);
+        pairwiseD(k) = getDist(i,j);
     end
 end
 avgPairwise = mean(pairwiseD.^2);
+
+% --- Fréchet medoid results (store to locals first) ---
+medoidIdx = NaN;
+medoidC = [];
+bestCost = NaN;
+candIdx = [];
+candidateCosts = []; % K random candidates
+
+if npTotal <= maxPairs
+    % We computed ALL pairs -> D is complete -> exact medoid
+    medoidCost = mean(D.^2, 1);           % 1xN
+    [bestCost, medoidIdx] = min(medoidCost);
+    medoidC = curvesAligned{medoidIdx};
+else
+    % We subsampled pairs -> D incomplete -> approximate medoid via random candidates
+    K = min(N, opts.medoid.numCandidates);   % K samples candidates
+    candIdx = randperm(N, K); % index of sampled candidates
+
+    candidateCosts = zeros(K,1);
+    for k = 1:K
+        j = candIdx(k);
+        s = 0;
+        for i = 1:N
+            dij = getDist(i,j);      
+            s = s + dij^2;
+        end
+        candidateCosts(k) = s / N;
+    end
+
+    [bestCost, kBest] = min(candidateCosts);
+    medoidIdx = candIdx(kBest);
+    medoidC   = curvesAligned{medoidIdx};
+end
+
+d_medoid_to_mean = analysis.curve_distance(medoidC, meanC, dopts);
+if frechetVar > 0
+    varRatio_medoid = bestCost / frechetVar;
+else
+    varRatio_medoid = NaN;
+end
 
 
 
@@ -111,6 +175,17 @@ metrics.pairwise.d = pairwiseD;
 metrics.pairwise.mean = avgPairwise;
 metrics.pairwise.ratio_meanToMeanPairwise = frechetVar / avgPairwise;  % scale check
 
+metrics.medoid = struct();
+metrics.medoid.idx = medoidIdx;         % index of frechet medoid
+metrics.medoid.cost = bestCost;         % corresponds to frechet Variance for medoid
+metrics.medoid.d_to_mean = d_medoid_to_mean; % distance between frechet medoid and frechet mean
+metrics.medoid.varRatio = varRatio_medoid; % ratio between FV(medoid) and FV(mean)
+
+if ~isempty(candIdx)
+    metrics.medoid.candidates = candIdx;
+    metrics.medoid.candidateCosts = candidateCosts;
+end
+
 metrics.modality = modality;
 
 metrics.curvature = struct();
@@ -143,6 +218,11 @@ if ~isfield(opts,'modality'), opts.modality = struct(); end
 if ~isfield(opts.modality,'numBins'),     opts.modality.numBins = 30; end
 if ~isfield(opts.modality,'smoothSigma'), opts.modality.smoothSigma = 1.0; end
 
+% --- Medoid settings ---
+if ~isfield(opts,'medoid'), opts.medoid = struct(); end
+if ~isfield(opts.medoid,'numCandidates'), opts.medoid.numCandidates = 20; end
+
+
 % --- Curvature settings ---
 if ~isfield(opts,'curvature'), opts.curvature = struct(); end
 if ~isfield(opts.curvature,'eps'), opts.curvature.eps = 1e-12; end
@@ -171,3 +251,5 @@ end
 s_new = linspace(0, L, Mnew).';
 C_u = interp1(s, C, s_new, 'pchip');     % Mnew x d
 end
+
+

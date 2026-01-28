@@ -33,6 +33,11 @@ T.frechetVar = metrics.dist.frechetVar;
 T.pairwise_mean = metrics.pairwise.mean;
 T.ratio_meanToMeanPairwise = metrics.pairwise.ratio_meanToMeanPairwise;
 
+%% Medoid
+T.frechetVar_medoid = metrics.medoid.cost;
+T.distance_Fmedoid_Fmean = metrics.medoid.d_to_mean;
+T.ratio_FVmedoid_FVmean = metrics.medoid.varRatio;
+
 %% Modality
 T.modality_class = string(metrics.modality.class);
 T.modality_peaks = metrics.modality.numPeaks;
@@ -46,7 +51,7 @@ T.bending_energy_meanC = metrics.curvature.arclen.mean.bending_energy;
 T.total_variation_meanC = metrics.curvature.arclen.mean.kappa_total_variation;
 T.second_difference_energy_meanC = metrics.curvature.arclen.mean.kappa_second_difference_energy;
 
-% curvature sample curves arrays
+% --- curvature sample curves arrays ---
 kappa_mean_samples = arrayfun(@(s) s.kappa_mean, metrics.curvature.arclen.samples);
 kappa_rms_samples = arrayfun(@(s) s.kappa_rms, metrics.curvature.arclen.samples);
 total_curvature_samples = arrayfun(@(s) s.total_curvature, metrics.curvature.arclen.samples);

@@ -66,5 +66,8 @@ S.metrics.pairwise.tauGrid = S.fm.tauGrid;     % reuse the same grid
 S.metrics.pairwise.interp = "pchip";
 S.metrics.modality.numBins = 30;
 S.metrics.modality.smoothSigma = 0.0;
+%% Frechet medoid
+S.metrics.medoid = struct();
+S.metrics.medoid.numCandidates = 20; % 12-25
 
 end
