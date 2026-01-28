@@ -1,4 +1,4 @@
-function h = plot_metrics_summary(metrics, plotOpts)
+function h = plot_metrics_summary(metrics, meanC, plotOpts)
 %PLOT_METRICS_SUMMARY Basic quantitative diagnostic plots.
 %
 % Returns struct h with figure handles:
@@ -8,6 +8,7 @@ function h = plot_metrics_summary(metrics, plotOpts)
 
 arguments
     metrics (1,1) struct
+    meanC   (:,:) double
     plotOpts struct = struct()
 end
 
@@ -37,11 +38,9 @@ y = ylim(ax1); x = xlim(ax1);
 text(ax1, x(1) + 0.05*(x(2)-x(1)), y(1) + 0.90*(y(2)-y(1)), txt);
 hold(ax1,'off');
 
-
-
 % b) Pairwise distance histogram
 ax2 = nexttile(t,2);
-histogram(ax2, metrics.pairwise.d, 30);
+histogram(ax2, metrics.pairwise.d, 10);
 grid(ax2,'on');
 xlabel(ax2,'$d(C_i, C_j)$'); ylabel(ax2,'count');
 title(ax2,'Pairwise distances');
@@ -51,7 +50,28 @@ if plotOpts.export
         'ContentType','image', 'Resolution', 600);
 end
 
-%% 2) Curvature metrics
+%% 2) Medoid vs. Mean
+fig3D_Medoid_Mean = figure('Color','w','Position',[200 100 900 700]);
+hold on; grid on;
+plot3([meanC(:,1);meanC(1,1)], [meanC(:,2);meanC(1,2)], [meanC(:,3);meanC(1,3)], ...
+    'k', 'LineWidth', 2, 'DisplayName', 'Fréchet mean');
+plot3([metrics.medoid.curve(:,1);metrics.medoid.curve(1,1)], ...
+    [metrics.medoid.curve(:,2);metrics.medoid.curve(1,2)], ...
+    [metrics.medoid.curve(:,3);metrics.medoid.curve(1,3)], ...
+    'b', 'LineWidth', 2, 'DisplayName', 'Fréchet medoid');
+xlabel('V'); ylabel('w'); zlabel('y');
+grid on;
+title('Fréchet medoid vs. Fréchet mean');
+legend();
+view([-30 20]);
+
+if plotOpts.export
+    exportgraphics(fig3D_Medoid_Mean, fullfile(plotOpts.outDir, "medoid_vs_mean.pdf"), ...
+        'ContentType','image', 'Resolution', 600);
+end
+
+
+%% 3) Curvature metrics
 %  a) Plot kappa vectors for mean curve and samples curves
 kappa_meanC = metrics.curvature.corr.mean.kappa;   % (M-2) x 1
 S = metrics.curvature.corr.samples;                % struct array N x 1
@@ -59,10 +79,10 @@ N = numel(S);
 
 h.figCurvature = figure();
 for i = 1:N
-    subplot(N+1,1,i);
+    %subplot(N+1,1,i);
     plot(S(i).kappa, 'k-'); hold on;  % default color; can look busy
 end
-subplot(N+1,1,N+1);
+%subplot(N+1,1,N+1);
 plot(kappa_meanC, 'r-');
 
 grid on;

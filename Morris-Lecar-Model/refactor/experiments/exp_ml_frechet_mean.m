@@ -41,7 +41,7 @@ meanTimeInfo.posWrap = meanPosWrap;
 %% Metrics
 % Geometric Fréchet mean metrics analysis
 metrics = analysis.compute_frechet_metrics(aligned, meanC, arc, fmInfo, S.metrics);
-analysis.export_metrics_table(metrics, S.export)
+analysis.export_metrics_table(metrics, S.export);
 
 %% Collect outputs
 out = struct();
@@ -67,7 +67,7 @@ colors = utils.make_colors(N, S.plot.useColor);
  
 % Plotting metrics
 if S.plot.metrics
-    plotting.plot_metrics_summary(metrics, S.export);
+    plotting.plot_metrics_summary(metrics, meanC, S.export);
 end
 
 

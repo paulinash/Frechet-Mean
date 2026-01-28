@@ -14,7 +14,7 @@ S = struct();
 %% I sweep
 S.I.low = 44.8;
 S.I.high = 44.9;
-S.I.N = 5;
+S.I.N = 20;
 S.I.values = linspace(S.I.low, S.I.high, S.I.N);
 
 %% Simulation
@@ -64,8 +64,9 @@ S.metrics.pairwise = struct();
 S.metrics.pairwise.allowShift = true;
 S.metrics.pairwise.tauGrid = S.fm.tauGrid;     % reuse the same grid
 S.metrics.pairwise.interp = "pchip";
-S.metrics.modality.numBins = 30;
+S.metrics.modality.numBins = 5;
 S.metrics.modality.smoothSigma = 0.0;
+
 %% Frechet medoid
 S.metrics.medoid = struct();
 S.metrics.medoid.numCandidates = 20; % 12-25

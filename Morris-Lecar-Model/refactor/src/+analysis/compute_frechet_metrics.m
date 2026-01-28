@@ -31,6 +31,7 @@ dopts.allowShift = opts.pairwise.allowShift;
 dopts.tauGrid    = opts.pairwise.tauGrid;
 dopts.interp     = opts.pairwise.interp;
 
+
 %% Pairwise distances and Frechet medoid
 D = nan(N,N);          %  distance matrix
 D(1:N+1:end) = 0;      % diagonal = 0
@@ -54,12 +55,15 @@ function dij = getDist(i,j)
 end
 
 % Pairwise distance
+fprintf('Computing Pairwise distances of sample curves ');
 npTotal = N*(N-1)/2;
 maxPairs = 200;
 
 
 if npTotal <= maxPairs
     % --- compute all pairs ---
+    fprintf('using all %d pairs. \n', npTotal);
+
     pairwiseD = zeros(npTotal,1);
     pairs = zeros(npTotal,2);
 
@@ -73,6 +77,8 @@ if npTotal <= maxPairs
     end
 else
     % --- randomly subsample maxPairs unordered pairs ---
+    fprintf('sampling %d pairs instead of %d pairs. \n',maxPairs, npTotal);
+
     pairwiseD = zeros(maxPairs,1);
     pairs = zeros(maxPairs,2);
 
@@ -96,7 +102,10 @@ else
 end
 avgPairwise = mean(pairwiseD.^2);
 
+
+
 % --- Fréchet medoid results (store to locals first) ---
+fprintf('Computing Fréchet medoid ');
 medoidIdx = NaN;
 medoidC = [];
 bestCost = NaN;
@@ -105,12 +114,15 @@ candidateCosts = []; % K random candidates
 
 if npTotal <= maxPairs
     % We computed ALL pairs -> D is complete -> exact medoid
+    fprintf('using all %d pairs. \n', npTotal);
     medoidCost = mean(D.^2, 1);           % 1xN
     [bestCost, medoidIdx] = min(medoidCost);
     medoidC = curvesAligned{medoidIdx};
 else
     % We subsampled pairs -> D incomplete -> approximate medoid via random candidates
     K = min(N, opts.medoid.numCandidates);   % K samples candidates
+    fprintf('by subsampling. \n');
+
     candIdx = randperm(N, K); % index of sampled candidates
 
     candidateCosts = zeros(K,1);
@@ -139,11 +151,13 @@ end
 
 
 %% --- Modality check of d_to_mean distribution ---
+fprintf('Computing modality stats...\n');
 modality = analysis.modality_from_hist(d_to_mean, opts.modality);
 
 
 %% --- Curvature / smoothness metrics (mean vs samples) ---
 % correspondence parametrization ( for plotting curvature only!)
+fprintf('Computing curvature stats...\n');
 [curvMean_corr, curvSamples_corr] = analysis.curvature_metrics(meanC, curvesAligned, opts.curvature);
 
 % arc length parametrization (for metrics use)
@@ -177,6 +191,7 @@ metrics.pairwise.ratio_meanToMeanPairwise = frechetVar / avgPairwise;  % scale c
 
 metrics.medoid = struct();
 metrics.medoid.idx = medoidIdx;         % index of frechet medoid
+metrics.medoid.curve = medoidC;         % Frechet medoid
 metrics.medoid.cost = bestCost;         % corresponds to frechet Variance for medoid
 metrics.medoid.d_to_mean = d_medoid_to_mean; % distance between frechet medoid and frechet mean
 metrics.medoid.varRatio = varRatio_medoid; % ratio between FV(medoid) and FV(mean)
