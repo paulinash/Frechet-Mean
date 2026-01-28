@@ -44,7 +44,8 @@ S.plot.lineWidth = 1.25;
 S.plot.figureColor = "w";
 S.plot.useLatex = true;
 S.plot.metrics = true;
-S.plot.trajectories = true;
+S.plot.trajectories2D = false;
+S.plot.trajectories3D = true;
 
 %% Export settings
 S.export.export = true;

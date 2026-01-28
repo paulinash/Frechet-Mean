@@ -19,48 +19,37 @@ if plotOpts.export && ~isfolder(plotOpts.outDir)
     mkdir(plotOpts.outDir);
 end
 
+%% 1) Histograms distance vector
 h = struct();
+h.figHistograms = figure('Color','w','Name','Distances to mean','Position',[200 100 800 520]);
+t = tiledlayout(1,2,'TileSpacing','compact','Padding','compact');
 
-%% 1) Distances to mean histogram
-h.figDistToMean = figure('Color','w','Name','Distances to mean','Position',[200 100 800 520]);
-histogram(metrics.dist.toMean, metrics.modality.edges);
-grid on;
-xlabel('$d(C_i, \mu)$'); ylabel('count');
-title('Distances to Frechet mean', 'Interpreter','latex');
+% a) Distances to mean histogram
+ax1 = nexttile(t,1);
+histogram(ax1, metrics.dist.toMean, metrics.modality.edges);
+grid(ax1,'on');
+xlabel(ax1,'$d(C_i, \mu)$'); ylabel(ax1,'count');
+title(ax1,'Distances to Frechet mean', 'Interpreter','latex');
 
 % show modality classification
 txt = sprintf('Modality: %s (peaks=%d)', string(metrics.modality.class), metrics.modality.numPeaks);
-y = ylim; x = xlim;
-text(x(1) + 0.05*(x(2)-x(1)), y(1) + 0.90*(y(2)-y(1)), txt);
+y = ylim(ax1); x = xlim(ax1);
+text(ax1, x(1) + 0.05*(x(2)-x(1)), y(1) + 0.90*(y(2)-y(1)), txt);
+
+% b) Pairwise distance histogram
+ax2 = nexttile(t,2);
+histogram(ax2, metrics.pairwise.d, 30);
+grid(ax2,'on');
+xlabel(ax2,'$d(C_i, C_j)$'); ylabel(ax2,'count');
+title(ax2,'Pairwise distances');
 
 if plotOpts.export
-    exportgraphics(h.figDistToMean, fullfile(plotOpts.outDir, "metrics_dist_to_mean.pdf"), ...
+    exportgraphics(h.figHistograms, fullfile(plotOpts.outDir, "metrics_histogram_distances.pdf"), ...
         'ContentType','image', 'Resolution', 600);
 end
 
-
-%% 2) Pairwise distance histogram
-h.figPairwise = figure('Color','w','Name','Pairwise distances','Position',[240 120 800 520]);
-histogram(metrics.pairwise.d, 30);
-grid on;
-xlabel('$d(C_i, C_j)$'); ylabel('count');
-title('Pairwise distances');
-
-if isfield(metrics.pairwise,'opts') && isfield(metrics.pairwise.opts,'allowShift')
-    if metrics.pairwise.opts.allowShift
-        subtitle('shift-invariant (min over \tau)');
-    else
-        subtitle('as-aligned (no shift search)');
-    end
-end
-
-if plotOpts.export
-    exportgraphics(h.figPairwise, fullfile(plotOpts.outDir, "metrics_pairwise_dist.pdf"), ...
-        'ContentType','image', 'Resolution', 600);
-end
-
-
-%% Plot kappa vectors for mean curve and samples curves
+%% 2) Curvature metrics
+%  a) Plot kappa vectors for mean curve and samples curves
 kappa_meanC = metrics.curvature.corr.mean.kappa;   % (M-2) x 1
 S = metrics.curvature.corr.samples;                % struct array N x 1
 N = numel(S);
@@ -82,7 +71,7 @@ if plotOpts.export
         'ContentType','image', 'Resolution', 600);
 end
 
-%% 3) Curvature metrics comparison
+%  b) Curvature metrics comparison
 N = metrics.N;
 kappa_mean_meanC = metrics.curvature.arclen.mean.kappa_mean;
 kappa_mean_samples = arrayfun(@(s) s.kappa_mean, metrics.curvature.arclen.samples);

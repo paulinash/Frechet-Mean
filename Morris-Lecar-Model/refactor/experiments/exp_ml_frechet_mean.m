@@ -71,17 +71,19 @@ if S.plot.metrics
 end
 
 
-% Plotting 2D and 3D trajectories
-if S.plot.trajectories
+% Plotting 2D trajectories
+if S.plot.trajectories2D
     plotting.plot_timeseries_2D(raw, meanC, meanTimeInfo, colors, S.export);
     plotting.plot_speed_profiles_2D(timeInfo, meanTimeInfo, raw, colors, S.export);
+end
 
+% Plotting 3D trajectories
+if S.plot.trajectories3D
     h = plotting.plot_trajectories_3D(aligned, meanC, raw, colors, S.export);
-
     if S.export.snapshot
         plotting.export_snapshots_3D(h.fig, h.trackers, timeInfo, meanTimeInfo, S.export);
     end
-
     plotting.animate_trackers_3D(h.trackers, timeInfo, meanTimeInfo, S.anim);
 end
+
 end
