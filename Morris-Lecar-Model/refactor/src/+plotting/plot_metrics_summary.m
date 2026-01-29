@@ -50,6 +50,39 @@ if plotOpts.export
         'ContentType','image', 'Resolution', 600);
 end
 
+
+
+%% new modality plots
+h = struct();
+h.figGapModality = figure('Color','w','Name','Distances to mean','Position',[200 100 800 520]);
+t = tiledlayout(1,2,'TileSpacing','compact','Padding','compact');
+
+% a) Distances to mean histogram
+ax1 = nexttile(t,1);
+plot_sorted_distances(ax1, metrics.modality_gap);
+grid(ax1,'on');
+xlabel(ax1,'$d(C_i, \mu)$'); ylabel(ax1,'count');
+title(ax1,'Distances to Frechet mean', 'Interpreter','latex');
+
+% show modality classification
+txt = sprintf('Gap score: %s ', string(metrics.modality_gap.class));
+y = ylim(ax1); x = xlim(ax1);
+text(ax1, x(1) + 0.05*(x(2)-x(1)), y(1) + 0.90*(y(2)-y(1)), txt);
+hold(ax1,'off');
+
+% b) Pairwise distance histogram
+ax2 = nexttile(t,2);
+plot_sorted_distances(ax2, metrics.modality_gap_pairwise);
+grid(ax2,'on');
+xlabel(ax2,'$d(C_i, C_j)$'); ylabel(ax2,'count');
+title(ax2,'Pairwise distances');
+
+if plotOpts.export
+    exportgraphics(h.figGapModality, fullfile(plotOpts.outDir, "metrics_gap_plot.pdf"), ...
+        'ContentType','image', 'Resolution', 600);
+end
+
+
 %% 2) Medoid vs. Mean
 fig3D_Medoid_Mean = figure('Color','w','Position',[200 100 900 700]);
 hold on; grid on;
@@ -170,4 +203,40 @@ ymax = max([samples(:); meanC]);
 ylim([0.9*ymin, 1.1*ymax]);
 xlim([0.7 1.3]);
 
+end
+
+
+function plot_sorted_distances(ax, distStruct)
+% distStruct is the output of modality_from_sorted_gap
+xs = distStruct.sorted;
+n = distStruct.n;
+
+hold(ax,'on'); grid(ax,'on');
+plot(ax, 1:n, xs, '-o', 'MarkerSize', 4);
+
+xlabel(ax,'rank (sorted)');
+ylabel(ax,'d(C_i,\mu)');
+title(ax,'Sorted distances to Fréchet mean');
+
+% Mark the biggest gap
+if ~isempty(distStruct.splitIndex)
+    k = distStruct.splitIndex;
+    xline(ax, k+0.5, '--');
+    yline(ax, distStruct.splitValueLeft,  ':');
+    yline(ax, distStruct.splitValueRight, ':');
+end
+
+% Use log scale if wide range
+xminpos = min(xs(xs>0));
+if ~isempty(xminpos) && max(xs) / xminpos > 50
+    set(ax,'YScale','log');
+    ylabel(ax,'d(C_i,\mu) (log scale)');
+end
+
+txt = sprintf('class=%s, gapScore=%.3g, split k=%d', ...
+    string(distStruct.class), distStruct.gapScore, distStruct.splitIndex);
+yl = ylim(ax); xl = xlim(ax);
+text(ax, xl(1) + 0.02*(xl(2)-xl(1)), yl(1) + 0.92*(yl(2)-yl(1)), txt);
+
+hold(ax,'off');
 end

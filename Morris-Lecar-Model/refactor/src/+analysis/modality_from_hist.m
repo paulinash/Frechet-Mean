@@ -1,7 +1,10 @@
 function out = modality_from_hist(x, opts)
 %MODALITY_FROM_HIST Simple unimodal/multimodal heuristic via smoothed histogram peaks.
 x = x(:);
-nb = opts.numBins;
+%nb = opts.numBins;
+nb = number_of_bins(x);
+fprintf('number of bins %d', nb);
+
 sigma = opts.smoothSigma;
 
 % histogram
@@ -53,5 +56,29 @@ if out.numPeaks <= 1
 else
     out.class = "multimodal";
 end
+end
 
+
+function nb = number_of_bins(x)
+n = numel(x);
+iqrX = iqr(x);
+rngX = max(x) - min(x);
+
+if rngX == 0
+    nb = 1;
+else
+    if iqrX > 0
+        h = 2*iqrX / (n^(1/3) + eps);   % Freedman–Diaconis width
+    else
+        % fallback if IQR is zero (many ties)
+        s = std(x);
+        h = 3.5*s / (n^(1/3) + eps);
+    end
+
+    nbFD = ceil(rngX / (h + eps));
+
+    minBins = 5;
+    maxBins = min(30, ceil(n/2));       % scale with n
+    nb = max(minBins, min(maxBins, nbFD));
+end
 end

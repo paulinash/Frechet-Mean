@@ -121,7 +121,7 @@ if npTotal <= maxPairs
 else
     % We subsampled pairs -> D incomplete -> approximate medoid via random candidates
     K = min(N, opts.medoid.numCandidates);   % K samples candidates
-    fprintf('by subsampling. \n');
+    fprintf('using roughly %d x %d = %d pairs. \n', K,N,K*N);
 
     candIdx = randperm(N, K); % index of sampled candidates
 
@@ -153,7 +153,8 @@ end
 %% --- Modality check of d_to_mean distribution ---
 fprintf('Computing modality stats...\n');
 modality = analysis.modality_from_hist(d_to_mean, opts.modality);
-
+modality_gap = analysis.modality_from_sorted_gap(d_to_mean, opts.modalityGap);
+modality_gap_pairwise = analysis.modality_from_sorted_gap(pairwiseD, opts.modalityGap);
 
 %% --- Curvature / smoothness metrics (mean vs samples) ---
 % correspondence parametrization ( for plotting curvature only!)
@@ -202,6 +203,8 @@ if ~isempty(candIdx)
 end
 
 metrics.modality = modality;
+metrics.modality_gap = modality_gap;
+metrics.modality_gap_pairwise = modality_gap_pairwise;
 
 metrics.curvature = struct();
 metrics.curvature.corr   = struct('mean', curvMean_corr, 'samples', curvSamples_corr);
@@ -232,6 +235,10 @@ if ~isfield(opts.pairwise,'interp'),     opts.pairwise.interp = "pchip"; end
 if ~isfield(opts,'modality'), opts.modality = struct(); end
 if ~isfield(opts.modality,'numBins'),     opts.modality.numBins = 30; end
 if ~isfield(opts.modality,'smoothSigma'), opts.modality.smoothSigma = 1.0; end
+if ~isfield(opts,'modalityGap'), opts.modalityGap = struct(); end
+if ~isfield(opts.modalityGap,'gapThreshold'), opts.modalityGap.gapThreshold = 1.0; end
+if ~isfield(opts.modalityGap,'minGroupSize'), opts.modalityGap.minGroupSize = 2; end
+
 
 % --- Medoid settings ---
 if ~isfield(opts,'medoid'), opts.medoid = struct(); end
