@@ -9,12 +9,20 @@ clear; close all; clc;
 
 %% USER OPTIONS
 epsilon   = 0.1;
-dynamics = false;
+dynamics = false; % period consideration
 useColor = true;
+random_samples = true;
+a = -1.0;
+b = 1.0;
+Na = 50;
 
 % Samples of a
-a_vals = linspace(-0.6,0.9,40);
-Na = numel(a_vals);
+if random_samples
+    rng(123);
+    a_vals = a + (b - a) * rand(1, Na);
+else    
+    a_vals = linspace(a,b,Na);
+end
 
 % Simulation time and timesteps for ODE solver
 Tfinal = 400;
@@ -168,11 +176,11 @@ meanSpeed = mean(allSpeeds,1).';   % M×1
 %% ================================================================
 % Initialize plot
 figure('Color','w','Position',[100 100 1100 700]); hold on; axis equal; grid on;
-if dynamics
-    title('Fréchet Mean of periodic Van Der Pol solutions with dynamics');
-else
-    title('Fréchet Mean of periodic Van Der Pol solutions without dynamics');
-end
+%if dynamics
+%    title('Fréchet Mean of periodic Van Der Pol solutions with dynamics');
+%else
+%    title('Fréchet Mean of periodic Van Der Pol solutions without dynamics');
+%end
 
 if useColor
     colors = lines(Na);            % one color per sample
@@ -200,7 +208,7 @@ end
 hMean = plot(meanCurve(1,1), meanCurve(1,2),'ko','MarkerFaceColor','k','MarkerSize',9,'DisplayName','tracker');
 
 % Label and legend
-xlabel('x'); ylabel('y');
+%xlabel('x'); ylabel('y');
 
 %% ================================================================
 %   PRECOMPUTE MOTION PARAMETRIZATION (dynamics vs. uniform)

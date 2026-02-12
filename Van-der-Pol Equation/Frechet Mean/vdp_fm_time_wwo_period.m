@@ -15,10 +15,20 @@ clear; close all; clc;
 % period
 usePeriod = false;   
 useColor = true;
+a = -1.0;
+b = 1.0;
+Na = 50;
+random_samples = true;
 
 epsilon   = 0.1;
-a_vals = linspace(-0.6,0.9,40);
-Na = numel(a_vals);
+
+% Samples of a
+if random_samples
+    rng(123);
+    a_vals = a + (b - a) * rand(1, Na);
+else    
+    a_vals = linspace(a,b,Na);
+end
 
 Tfinal = 400;
 dt = 0.005;
@@ -76,7 +86,7 @@ sGrid   = linspace(0,1,M+1);
 sGrid   = sGrid(1:end-1);
 tauGrid = linspace(0,1,M);
 
-% Initial mean (Code G & I identical)
+% Initial mean 
 meanCurve = mean(cat(3,curves_res{:}),3);
 
 for iter = 1:maxIter
@@ -128,14 +138,14 @@ fprintf('Mean period: %.2f', meanPeriod);
 %% ================================================================
 % PLOT CURVES
 %% ================================================================
-figure('Color','w','Position',[100 100 1000 700]);
+figure('Color','w','Position',[100 100 1100 700]); hold on; axis equal; grid on;
 hold on; axis equal; grid on;
 
 titleStr = sprintf('Fréchet mean');
 if usePeriod
     titleStr = [titleStr ', with period'];
 end
-title(titleStr)
+%title(titleStr)
 
 if useColor
     colors = lines(Na);            % one color per sample    
@@ -151,7 +161,7 @@ for k = 1:Na
 end
 plot([meanCurve(:,1); meanCurve(1,1)], [meanCurve(:,2); meanCurve(1,2)],'k','LineWidth',2);
 
-xlabel('x'); ylabel('y');
+%xlabel('x'); ylabel('y');
 exportgraphics(gcf,'Figures_vdp/time_param/fig_frechet_mean.pdf','ContentType','vector');
 
 
