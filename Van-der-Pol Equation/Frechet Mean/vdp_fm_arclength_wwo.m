@@ -15,6 +15,8 @@ random_samples = true;
 a = -1.0;
 b = 1.0;
 Na = 50;
+nFrames = 4;                  % number of snapshots, 0 if to be skipped
+
 
 % Samples of a
 if random_samples
@@ -301,8 +303,6 @@ end
 %% ================================================================
 outDir = 'Figures_vdp/arc_param';
 if ~exist(outDir,'dir'); mkdir(outDir); end
-
-nFrames = 9;
 
 % One full cycle in the SAME units as your unified parametrization:
 % dynamics=true  -> seconds, use meanPeriod

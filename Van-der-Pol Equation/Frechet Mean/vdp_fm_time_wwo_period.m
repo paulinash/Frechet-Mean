@@ -13,12 +13,14 @@ clear; close all; clc;
 % true: all curves are rescaled back to their respective period    
 % false: all curves are sampled with M points and thuse scaled onto one
 % period
-usePeriod = false;   
+dynamics = false;   
 useColor = true;
 a = -1.0;
 b = 1.0;
 Na = 50;
 random_samples = true;
+nFrames = 0;                  % number of snapshots, 0 if to be skipped
+
 
 epsilon   = 0.1;
 
@@ -82,12 +84,16 @@ end
 %% ================================================================
 aligned = curves_res;
 
-sGrid   = linspace(0,1,M+1);
-sGrid   = sGrid(1:end-1);
+sq   = linspace(0,1,M+1);
+sq   = sq(1:end-1);
 tauGrid = linspace(0,1,M);
 
 % Initial mean 
-meanCurve = mean(cat(3,curves_res{:}),3);
+meanCurve = zeros(M,2);
+for k = 1:Na
+    meanCurve = meanCurve + curves_res{k};
+end
+meanCurve = meanCurve / Na;
 
 for iter = 1:maxIter
     mean_old = meanCurve;
@@ -102,8 +108,8 @@ for iter = 1:maxIter
         bestTau   = 0;
 
         for tau = tauGrid
-            sShift = mod(sGrid + tau,1);
-            Csh = interp1(sGrid, C, sShift,'pchip');
+            sShift = mod(sq + tau,1);
+            Csh = interp1(sq, C, sShift,'pchip');
 
             score = mean(sum((Csh - meanCurve).^2,2));
             if score < bestScore
@@ -112,8 +118,8 @@ for iter = 1:maxIter
             end
         end
 
-        sShift = mod(sGrid + bestTau,1);
-        aligned{k} = interp1(sGrid, C, sShift,'pchip');
+        sShift = mod(sq + bestTau,1);
+        aligned{k} = interp1(sq, C, sShift,'pchip');
     end
 
     % ------------------------------------------------------------
@@ -132,7 +138,7 @@ end
 
 % mean period
 meanPeriod = mean(periods);  
-fprintf('Mean period: %.2f', meanPeriod);
+fprintf("Mean period = %.6f\n", meanPeriod);
 
 
 %% ================================================================
@@ -142,7 +148,7 @@ figure('Color','w','Position',[100 100 1100 700]); hold on; axis equal; grid on;
 hold on; axis equal; grid on;
 
 titleStr = sprintf('Fréchet mean');
-if usePeriod
+if dynamics
     titleStr = [titleStr ', with period'];
 end
 %title(titleStr)
@@ -184,7 +190,6 @@ hMean = plot(meanCurve(1,1), meanCurve(1,2),'ko', ...
 outDir = 'Figures_vdp/time_param';
 if ~exist(outDir,'dir'); mkdir(outDir); end
 
-nFrames = 9;                                   % how many snapshots you want
 frameTimes = linspace(0, meanPeriod, nFrames+1);
 frameTimes(end) = [];                          % drop endpoint (same as 0)
 
@@ -193,7 +198,7 @@ for f = 1:numel(frameTimes)
 
     % --- update sample trackers ---
     for k = 1:Na
-        if usePeriod
+        if dynamics
             Tk = periods(k);
             s  = mod(t_global, Tk) / Tk;
         else
@@ -236,7 +241,7 @@ while true
     t_global = t_global + speed*dt_play;
 
     for k = 1:Na
-        if usePeriod
+        if dynamics
             Tk = periods(k);
             s  = mod(t_global, Tk) / Tk;
         else
@@ -266,7 +271,7 @@ while true
     drawnow limitrate;
     pause(dt_play);
 end
-
+end
 
 
 
