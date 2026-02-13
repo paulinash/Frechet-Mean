@@ -1,4 +1,4 @@
-function rm_frechet_mean_arclength
+function rm_frechet_mean
 % rm_frechet_mean_arclength
 % Compute iterative Fréchet mean (arclength parametrization) for several
 % Rosenzweig-MacArthur limit cycles and animate moving markers on sample
@@ -16,11 +16,11 @@ clear; close all; clc;
 % Choose alpha and beta values to explore. Gamma will be chosen relative
 % to the Hopf threshold gamma_H to ensure oscillations.
 alpha_vals = [0.1, 0.2, 0.4];    % must satisfy 0 < alpha < 1
-beta_vals  = [0.5];          % predator/prey timescale ratio
+beta_vals  = [0.5,1];          % predator/prey timescale ratio, (0.2,5)
 % For each (alpha,beta) we'll choose a few gamma multipliers >1 (relative
 % to gamma_H) to move into oscillatory regime.
-gamma_mults = [1.25, 2.0, 4.0];
-gamma_mults = [1.25];
+gamma_mults = [1.25, 2.0, 3.0];
+%gamma_mults = [1.25];
 
 % Compose parameter list (all combinations)
 paramList = [];
@@ -51,10 +51,10 @@ end
 Tfinal = 800;      % make long enough to let transients die
 dt     = 0.02;
 tspan  = 0:dt:Tfinal;
-M      = 400;      % number of geometric samples per curve (perimeter points)
+M      = 300;      % number of geometric samples per curve (perimeter points)
 
 % Frechet mean settings
-maxIter = 80;
+maxIter = 20;
 tol     = 1e-8;
 
 % Peak detection settings (to extract last single period)
@@ -69,7 +69,6 @@ periods    = zeros(Na,1);   % period per case
 raw_time_samples = cell(Na,1);
 
 %% ====================== SIMULATE + EXTRACT PERIOD ======================
-opts = odeset('RelTol',1e-6,'AbsTol',1e-9);
 for k = 1:Na
     alpha = paramList(k).alpha;
     beta  = paramList(k).beta;
@@ -84,7 +83,7 @@ for k = 1:Na
     % initial condition (small predator & prey positive)
     z0 = [0.5*gamma; 0.5]; % start somewhere positive (scaled with gamma helps)
     % Integrate
-    [t,z] = ode45(rm, tspan, z0, opts);
+    [t,z] = ode45(rm, tspan, z0);
 
     % discard first half (transients)
     idx = t >= (Tfinal/2);
@@ -149,8 +148,7 @@ for iter = 1:maxIter
 
     % Align each curve to current mean by best circular shift
     for k = 1:Na
-        C = curves_res{k};
-        bestScore = Inf; bestShift = 0;
+        C = curves_res{k}; bestScore = Inf;
         % brute-force shifts (M shifts)
 
         for tau = tauGrid

@@ -164,6 +164,8 @@ end
 %   MEAN PERIOD AND MEAN VELOCITY
 %% ================================================================
 meanPeriod = mean(periods);
+fprintf('Mean period (average over cases) = %.6f\n', meanPeriod);
+
 
 % compute speed profiles
 allSpeeds = zeros(Na,M);
