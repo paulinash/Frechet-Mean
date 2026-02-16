@@ -12,11 +12,27 @@ function rm_frechet_mean
 
 clear; close all; clc;
 
+% Plotting conventions
+set(groot, ...
+    'DefaultTextInterpreter','latex', ...
+    'DefaultAxesTickLabelInterpreter','latex', ...
+    'DefaultLegendInterpreter','latex', ...
+    'DefaultAxesFontName','Times', ...
+    'DefaultTextFontName','Times', ...
+    'DefaultAxesFontSize', 12, ...
+    'DefaultTextFontSize', 12, ...
+    'DefaultLegendFontSize', 11, ...
+    'DefaultLineLineWidth', 1.2, ...
+    'DefaultFigureColor','w');
+
+
 %% ========================== USER OPTIONS =============================
 % Choose alpha and beta values to explore. Gamma will be chosen relative
 % to the Hopf threshold gamma_H to ensure oscillations.
 alpha_vals = [0.1, 0.2, 0.4];    % must satisfy 0 < alpha < 1
-beta_vals  = [0.5,1];          % predator/prey timescale ratio, (0.2,5)
+alpha_vals = [0.1];
+beta_vals  = [0.5,1,2];          % predator/prey timescale ratio, (0.2,5)
+beta_vals = [0.5];
 % For each (alpha,beta) we'll choose a few gamma multipliers >1 (relative
 % to gamma_H) to move into oscillatory regime.
 gamma_mults = [1.25, 2.0, 3.0];
@@ -48,7 +64,7 @@ for k=1:Na
 end
 
 % Simulation time / solver settings
-Tfinal = 800;      % make long enough to let transients die
+Tfinal = 500;      % make long enough to let transients die
 dt     = 0.02;
 tspan  = 0:dt:Tfinal;
 M      = 300;      % number of geometric samples per curve (perimeter points)
@@ -247,15 +263,14 @@ cumt_mean = cumt_mean * (meanPeriod / cumt_mean(end));
 
 %% ====================== PLOT + ANIMATE ==================================
 figure('Color','w','Position',[50 50 1200 700]); hold on; axis equal; grid on;
-title('Fréchet Mean of Rosenzweig-MacArthur limit cycles (arclength-parametrized)');
 colors = lines(Na);
 
 % plot sample curves and mean
 for k = 1:Na
-    plot(aligned{k}(:,1), aligned{k}(:,2), 'Color', colors(k,:), 'LineWidth', 1.2, ...
-        'DisplayName', sprintf('case %d: a=%.2f b=%.2f g=%.2f', k, paramList(k).alpha, paramList(k).beta, paramList(k).gamma));
+    plot([aligned{k}(:,1); aligned{k}(1,1)], [aligned{k}(:,2); aligned{k}(1,2)], 'Color', colors(k,:), 'LineWidth', 1.2, ...
+        'DisplayName', sprintf('case %d: a=%.2f b=%.2f g=%.2f', k, paramList(k).alpha, paramList(k).beta, paramList(k).gamma)); 
 end
-plot(meanCurve(:,1), meanCurve(:,2), 'k', 'LineWidth', 2.2, 'DisplayName','mean curve');
+plot([meanCurve(:,1); meanCurve(1,1)], [meanCurve(:,2); meanCurve(1,2)], 'k', 'LineWidth', 2.2, 'DisplayName','mean curve');
 
 % create markers for animation
 hCurve = gobjects(Na,1);
@@ -266,8 +281,11 @@ for k = 1:Na
 end
 hMean = plot(meanCurve(1,1), meanCurve(1,2), 'ko', 'MarkerFaceColor','k', 'MarkerSize', 9, 'DisplayName','tracker');
 
-xlabel('x'); ylabel('y');
-legend('Location','northeastoutside');
+%xlabel('x'); ylabel('y');
+%legend('Location','northeastoutside');
+
+exportgraphics(gcf,'Figures_rm/fig_frechet_mean.pdf','ContentType','vector');
+
 
 fprintf('Animation running... press Ctrl-C in the MATLAB window to stop.\n');
 
