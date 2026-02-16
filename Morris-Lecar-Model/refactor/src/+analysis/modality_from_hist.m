@@ -3,7 +3,6 @@ function out = modality_from_hist(x, opts)
 x = x(:);
 %nb = opts.numBins;
 nb = number_of_bins(x);
-fprintf('number of bins %d', nb);
 
 sigma = opts.smoothSigma;
 

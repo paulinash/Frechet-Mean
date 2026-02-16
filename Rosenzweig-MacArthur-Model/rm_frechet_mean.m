@@ -30,13 +30,13 @@ set(groot, ...
 % Choose alpha and beta values to explore. Gamma will be chosen relative
 % to the Hopf threshold gamma_H to ensure oscillations.
 alpha_vals = [0.1, 0.2, 0.4];    % must satisfy 0 < alpha < 1
-alpha_vals = [0.1];
+%alpha_vals = [0.1];
 beta_vals  = [0.5,1,2];          % predator/prey timescale ratio, (0.2,5)
 beta_vals = [0.5];
 % For each (alpha,beta) we'll choose a few gamma multipliers >1 (relative
 % to gamma_H) to move into oscillatory regime.
 gamma_mults = [1.25, 2.0, 3.0];
-%gamma_mults = [1.25];
+gamma_mults = [1.25];
 
 % Compose parameter list (all combinations)
 paramList = [];
@@ -264,6 +264,8 @@ cumt_mean = cumt_mean * (meanPeriod / cumt_mean(end));
 %% ====================== PLOT + ANIMATE ==================================
 figure('Color','w','Position',[50 50 1200 700]); hold on; axis equal; grid on;
 colors = lines(Na);
+colors = 0.5*colors + 0.5;   % mix with white
+
 
 % plot sample curves and mean
 for k = 1:Na

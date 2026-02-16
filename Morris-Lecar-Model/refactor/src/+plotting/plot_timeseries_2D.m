@@ -48,9 +48,9 @@ for i = 1:3
     end
 
     plot(tmean, Cm_w(1:end-1, cols(i)), 'k', 'LineWidth', 1.5, 'DisplayName', 'mean');
-    xlabel('t');
-    ylabel(ylabels{i});
-    title(titles{i});
+    %xlabel('t');
+    %ylabel(ylabels{i});
+    %title(titles{i});
 
     if plotOpts.export
         exportgraphics(handles.fig(i), fullfile(plotOpts.outDir, fileTags{i} + ".pdf"), 'ContentType','image', 'Resolution',600);

@@ -21,13 +21,13 @@ set(groot, ...
 
 %% USER OPTIONS
 epsilon   = 0.1;
-dynamics = false; % period consideration
+dynamics = true; % false: geometric arc length, true: consider dynamics 
 useColor = true;
 random_samples = true;
 a = -1.0;
 b = 1.0;
-Na = 50;
-nFrames = 4;                  % number of snapshots, 0 if to be skipped
+Na = 3;
+nFrames = 9;                  % number of snapshots, 0 if to be skipped
 
 
 % Samples of a

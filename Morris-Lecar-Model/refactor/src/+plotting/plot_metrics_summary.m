@@ -52,37 +52,6 @@ end
 
 
 
-%% new modality plots
-h = struct();
-h.figGapModality = figure('Color','w','Name','Distances to mean','Position',[200 100 800 520]);
-t = tiledlayout(1,2,'TileSpacing','compact','Padding','compact');
-
-% a) Distances to mean histogram
-ax1 = nexttile(t,1);
-plot_sorted_distances(ax1, metrics.modality_gap);
-grid(ax1,'on');
-xlabel(ax1,'$d(C_i, \mu)$'); ylabel(ax1,'count');
-title(ax1,'Distances to Frechet mean', 'Interpreter','latex');
-
-% show modality classification
-txt = sprintf('Gap score: %s ', string(metrics.modality_gap.class));
-y = ylim(ax1); x = xlim(ax1);
-text(ax1, x(1) + 0.05*(x(2)-x(1)), y(1) + 0.90*(y(2)-y(1)), txt);
-hold(ax1,'off');
-
-% b) Pairwise distance histogram
-ax2 = nexttile(t,2);
-plot_sorted_distances(ax2, metrics.modality_gap_pairwise);
-grid(ax2,'on');
-xlabel(ax2,'$d(C_i, C_j)$'); ylabel(ax2,'count');
-title(ax2,'Pairwise distances');
-
-if plotOpts.export
-    exportgraphics(h.figGapModality, fullfile(plotOpts.outDir, "metrics_gap_plot.pdf"), ...
-        'ContentType','image', 'Resolution', 600);
-end
-
-
 %% 2) Medoid vs. Mean
 fig3D_Medoid_Mean = figure('Color','w','Position',[200 100 900 700]);
 hold on; grid on;
@@ -92,10 +61,10 @@ plot3([metrics.medoid.curve(:,1);metrics.medoid.curve(1,1)], ...
     [metrics.medoid.curve(:,2);metrics.medoid.curve(1,2)], ...
     [metrics.medoid.curve(:,3);metrics.medoid.curve(1,3)], ...
     'b', 'LineWidth', 2, 'DisplayName', 'Fréchet medoid');
-xlabel('V'); ylabel('w'); zlabel('y');
+%xlabel('V'); ylabel('w'); zlabel('y');
 grid on;
-title('Fréchet medoid vs. Fréchet mean');
-legend();
+%title('Fréchet medoid vs. Fréchet mean');
+%legend();
 view([-30 20]);
 
 if plotOpts.export
@@ -141,10 +110,10 @@ total_variation_samples = arrayfun(@(s) s.kappa_total_variation, metrics.curvatu
 second_difference_energy_meanC = metrics.curvature.arclen.mean.kappa_second_difference_energy;
 second_difference_energy_samples = arrayfun(@(s) s.kappa_second_difference_energy, metrics.curvature.arclen.samples);
 
-samples_list = {kappa_mean_samples, kappa_rms_samples, total_curvature_samples, bending_energy_samples, total_variation_samples, second_difference_energy_samples};
-meanC_list = [kappa_mean_meanC, kappa_rms_meanC, total_curvature_meanC, bending_energy_meanC, total_variation_meanC, second_difference_energy_meanC];
-title_list = {'Mean curvature', 'RMS curvature', 'Total curvature', 'Bending energy', ' total variation', 'second diff energy'};
-y_label_list = {'Mean ($\kappa$)', 'RMS ($\kappa$)', '$\int \kappa ds$', '$\int \kappa^2 ds$', ' $\sum|k_i - k_{i+1}|$', '...'};
+samples_list = {total_curvature_samples, bending_energy_samples};
+meanC_list = [total_curvature_meanC, bending_energy_meanC];
+title_list = {'Total curvature', 'Bending energy'};
+y_label_list = {'$\int \kappa ds$', '$\int \kappa^2 ds$'};
 
 h.figCurvature_metrics = figure('Color','w','Name','Curvature summary','Position',[280 140 920 520]);
 for counter=1:numel(samples_list)
@@ -179,7 +148,7 @@ end
 
 
 function plot_curvature_samples(meanC, samples, title_bp, y_label, counter)
-subplot(2,3,counter);
+subplot(1,2,counter);
 hold on;
 
 % x positions (with jitter for visibility)
@@ -191,12 +160,12 @@ scatter(x + jitter, samples, 25, 'k', 'filled');
 plot(1, meanC, 'r+', 'MarkerSize', 12, 'LineWidth', 2);
 
 grid on;
-title(title_bp, 'Interpreter','none');
-ylabel(y_label, 'Interpreter','latex');
+%title(title_bp, 'Interpreter','none');
+%ylabel(y_label, 'Interpreter','latex');
 
 ax = gca;
 ax.TickLabelInterpreter = 'latex';
-set(ax,'XTick',1,'XTickLabel',{'samples'});
+%set(ax,'XTick',1,'XTickLabel',{'samples'});
 
 ymin = min([samples(:); meanC]);
 ymax = max([samples(:); meanC]);
@@ -206,37 +175,4 @@ xlim([0.7 1.3]);
 end
 
 
-function plot_sorted_distances(ax, distStruct)
-% distStruct is the output of modality_from_sorted_gap
-xs = distStruct.sorted;
-n = distStruct.n;
 
-hold(ax,'on'); grid(ax,'on');
-plot(ax, 1:n, xs, '-o', 'MarkerSize', 4);
-
-xlabel(ax,'rank (sorted)');
-ylabel(ax,'d(C_i,\mu)');
-title(ax,'Sorted distances to Fréchet mean');
-
-% Mark the biggest gap
-if ~isempty(distStruct.splitIndex)
-    k = distStruct.splitIndex;
-    xline(ax, k+0.5, '--');
-    yline(ax, distStruct.splitValueLeft,  ':');
-    yline(ax, distStruct.splitValueRight, ':');
-end
-
-% Use log scale if wide range
-xminpos = min(xs(xs>0));
-if ~isempty(xminpos) && max(xs) / xminpos > 50
-    set(ax,'YScale','log');
-    ylabel(ax,'d(C_i,\mu) (log scale)');
-end
-
-txt = sprintf('class=%s, gapScore=%.3g, split k=%d', ...
-    string(distStruct.class), distStruct.gapScore, distStruct.splitIndex);
-yl = ylim(ax); xl = xlim(ax);
-text(ax, xl(1) + 0.02*(xl(2)-xl(1)), yl(1) + 0.92*(yl(2)-yl(1)), txt);
-
-hold(ax,'off');
-end

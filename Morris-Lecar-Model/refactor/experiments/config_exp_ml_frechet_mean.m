@@ -12,9 +12,9 @@ end
 S = struct();
 
 %% I sweep
-S.I.low = 45.4;
-S.I.high = 45.5;
-S.I.N = 10;
+S.I.low = 45;
+S.I.high = 45.3;
+S.I.N = 50;
 S.I.values = linspace(S.I.low, S.I.high, S.I.N);
 
 %% Simulation
@@ -44,12 +44,12 @@ S.plot.lineWidth = 1.25;
 S.plot.figureColor = "w";
 S.plot.useLatex = true;
 S.plot.metrics = true;
-S.plot.trajectories2D = false;
+S.plot.trajectories2D = true;
 S.plot.trajectories3D = true;
 
 %% Export settings
 S.export.export = true;
-S.export.snapshot = false;
+S.export.snapshot = true;
 S.export.outDir = fullfile(projectRoot,'figures');
 S.export.snapshotN = 9;
 

@@ -33,9 +33,9 @@ end
 % Mean speed (already computed in curves.reconstruct_time_from_speed)
 plot(meanTimeInfo.cumTime(1:end-1), meanTimeInfo.meanSp, 'k', 'LineWidth', 2.0, 'DisplayName', 'mean speed');
 
-xlabel('reconstructed time t (one burst)');
-ylabel('speed $\|\dot{z}\|$');
-title('Speed profiles vs reconstructed time');
+%xlabel('reconstructed time t (one burst)');
+%ylabel('speed $\|\dot{z}\|$');
+%title('Speed profiles vs reconstructed time');
 
 if plotOpts.export
     exportgraphics(hfig, fullfile(plotOpts.outDir, "speed_vs_time.pdf"), 'ContentType','image', 'Resolution',600);
