@@ -26,7 +26,7 @@ useColor = true;
 random_samples = true;
 a = -1.0;
 b = 1.0;
-Na = 3;
+Na = 50;
 nFrames = 9;                  % number of snapshots, 0 if to be skipped
 
 
@@ -199,7 +199,7 @@ figure('Color','w','Position',[100 100 1100 700]); hold on; axis equal; grid on;
 
 if useColor
     colors = lines(Na);            % one color per sample
-    colors = 0.5*colors + 0.5;   % mix with white
+    colors = 0.3*colors + 0.7;   % mix with white
 
 else
     gray = [0.75 0.75 0.75];       % light gray
@@ -217,6 +217,8 @@ exportgraphics(gcf,'Figures_vdp/arc_param/fig_frechet_mean.pdf','ContentType','v
 hCurve = gobjects(Na,1);
 for k = 1:Na
     C = aligned{k};
+    colors = lines(Na);            % one color per sample
+    colors = 0.5*colors + 0.5;
     hCurve(k) = plot(C(1,1), C(1,2),'o','Color',colors(k,:), ...
         'MarkerFaceColor',colors(k,:),'MarkerSize',7,'HandleVisibility','off');
 end

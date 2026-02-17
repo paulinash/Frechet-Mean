@@ -167,7 +167,7 @@ end
 
 if useColor
     colors = lines(Na);            % one color per sample    
-    colors = 0.5*colors + 0.5;   % mix with white
+    colors = 0.3*colors + 0.7;   % mix with white
 else
     gray = [0.75 0.75 0.75];       % light gray
     colors = repmat(gray, Na, 1);  % same gray for all samples
@@ -188,6 +188,8 @@ exportgraphics(gcf,'Figures_vdp/time_param/fig_frechet_mean.pdf','ContentType','
 %% ================================================================
 hCurve = gobjects(Na,1);
 for k = 1:Na
+    colors = lines(Na);            % one color per sample
+    colors = 0.5*colors + 0.5;
     hCurve(k) = plot(aligned{k}(1,1), aligned{k}(1,2),'o', ...
         'Color',colors(k,:), 'MarkerFaceColor',colors(k,:), ...
         'MarkerSize',8);
