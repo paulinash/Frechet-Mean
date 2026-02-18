@@ -26,7 +26,7 @@ useColor = true;
 random_samples = true;
 a = -1.0;
 b = 1.0;
-Na = 50;
+Na = 10;
 nFrames = 9;                  % number of snapshots, 0 if to be skipped
 
 
@@ -292,7 +292,7 @@ if dynamics
     cumt_mean = [0; cumsum(dt_m)];
 
     meanPeriod = mean(periods);  % you computed earlier too
-    cumt_mean = cumt_mean * (meanPeriod / cumt_mean(end));
+    %cumt_mean = cumt_mean * (meanPeriod / cumt_mean(end));
 
     paramMean = cumt_mean;
 

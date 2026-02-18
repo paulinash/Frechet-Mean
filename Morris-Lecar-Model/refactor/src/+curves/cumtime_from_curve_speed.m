@@ -37,6 +37,6 @@ dt_local = ds ./ sp;
 cumTime = [0; cumsum(dt_local)];
 
 % Rescale to match requested period
-cumTime = cumTime * (period / cumTime(end));
+%cumTime = cumTime * (period / cumTime(end));
 
 end

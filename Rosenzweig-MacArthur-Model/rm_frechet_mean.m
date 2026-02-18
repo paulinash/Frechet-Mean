@@ -29,14 +29,34 @@ set(groot, ...
 %% ========================== USER OPTIONS =============================
 % Choose alpha and beta values to explore. Gamma will be chosen relative
 % to the Hopf threshold gamma_H to ensure oscillations.
-alpha_vals = [0.1, 0.2, 0.4];    % must satisfy 0 < alpha < 1
-%alpha_vals = [0.1];
-beta_vals  = [0.5,1,2];          % predator/prey timescale ratio, (0.2,5)
-beta_vals = [0.5];
-% For each (alpha,beta) we'll choose a few gamma multipliers >1 (relative
-% to gamma_H) to move into oscillatory regime.
-gamma_mults = [1.25, 2.0, 3.0];
-gamma_mults = [1.25];
+
+% old
+
+
+
+% new
+alphaN = 10;
+alpha_low = 0.2;
+alpha_high = 0.6;
+
+betaN = 1;
+beta_low = 0.1;
+beta_high = 2;
+
+gamma_multN = 1;
+gamma_mult_low = 1.1;
+gamma_mult_high = 2;
+
+% Random seed
+rng(123);
+
+alpha_vals = alpha_low + (alpha_high - alpha_low)*rand(1,alphaN);
+beta_vals = beta_low + (beta_high - beta_low)*rand(1,betaN)
+gamma_mults = gamma_mult_low + (gamma_mult_high - gamma_mult_low)*rand(1,gamma_multN)
+alpha_vals = [0.2,0.3,0.4,0.5,0.6];
+alpha_vals = linspace(0.2,0.6,10);
+fmt=['alpha =' repmat(' %.4f',1,numel(alpha_vals))];
+fprintf(fmt,alpha_vals)
 
 % Compose parameter list (all combinations)
 paramList = [];
@@ -67,7 +87,7 @@ end
 Tfinal = 500;      % make long enough to let transients die
 dt     = 0.02;
 tspan  = 0:dt:Tfinal;
-M      = 300;      % number of geometric samples per curve (perimeter points)
+M      = 600;      % number of geometric samples per curve (perimeter points)
 
 % Frechet mean settings
 maxIter = 20;
@@ -98,6 +118,7 @@ for k = 1:Na
 
     % initial condition (small predator & prey positive)
     z0 = [0.5*gamma; 0.5]; % start somewhere positive (scaled with gamma helps)
+    z0 = [0.5;0.5];
     % Integrate
     [t,z] = ode45(rm, tspan, z0);
 
@@ -165,7 +186,6 @@ for iter = 1:maxIter
     % Align each curve to current mean by best circular shift
     for k = 1:Na
         C = curves_res{k}; bestScore = Inf;
-        % brute-force shifts (M shifts)
 
         for tau = tauGrid
             sq_shift = mod(sq(1:end-1) + tau, 1);
@@ -259,12 +279,12 @@ sp_m = meanSpeed;
 sp_m(sp_m < 1e-12) = 1e-12;
 dt_m = ds_m ./ sp_m;
 cumt_mean = [0; cumsum(dt_m)];
-cumt_mean = cumt_mean * (meanPeriod / cumt_mean(end));
+%cumt_mean = cumt_mean * (meanPeriod / cumt_mean(end));
 
 %% ====================== PLOT + ANIMATE ==================================
 figure('Color','w','Position',[50 50 1200 700]); hold on; axis equal; grid on;
 colors = lines(Na);
-colors = 0.5*colors + 0.5;   % mix with white
+colors = 0.3*colors + 0.7;   % mix with white
 
 
 % plot sample curves and mean
@@ -278,13 +298,15 @@ plot([meanCurve(:,1); meanCurve(1,1)], [meanCurve(:,2); meanCurve(1,2)], 'k', 'L
 hCurve = gobjects(Na,1);
 for k = 1:Na
     C = aligned{k};
+    colors = lines(Na);
+    colors = 0.5*colors + 0.5;   % mix with white
     hCurve(k) = plot(C(1,1), C(1,2), 'o', 'Color', colors(k,:), ...
         'MarkerFaceColor', colors(k,:), 'MarkerSize', 7, 'HandleVisibility','off');
 end
 hMean = plot(meanCurve(1,1), meanCurve(1,2), 'ko', 'MarkerFaceColor','k', 'MarkerSize', 9, 'DisplayName','tracker');
 
 %xlabel('x'); ylabel('y');
-%legend('Location','northeastoutside');
+legend('Location','northeastoutside');
 
 exportgraphics(gcf,'Figures_rm/fig_frechet_mean.pdf','ContentType','vector');
 

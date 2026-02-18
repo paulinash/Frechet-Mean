@@ -5,9 +5,9 @@ function rm_slider_explorer
 clear; close all; clc;
 
 %% ========== DEFAULT PARAMETERS ==========
-alpha0 = 0.1;
-beta0  = 0.5;
-gamma0 = 1.5;
+alpha0 = 0.6;
+beta0  = 0.7520;
+gamma0 = 7.025;
 
 Tend = 300;
 dt   = 0.02;

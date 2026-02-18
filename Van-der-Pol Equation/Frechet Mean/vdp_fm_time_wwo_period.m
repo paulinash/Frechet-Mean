@@ -174,10 +174,9 @@ else
 end
 
 for k = 1:Na
-    plot([aligned{k}(:,1); aligned{k}(1,1)], [aligned{k}(:,2); aligned{k}(1,2)],'Color',colors(k,:), ...
-        'LineWidth',1.2);
+    plot([aligned{k}(:,1);  aligned{k}(1,1)], [aligned{k}(:,2);  aligned{k}(1,2)],'Color',colors(k,:),'LineWidth',1.0, 'DisplayName',sprintf('a=%.2f',a_vals(k)));
 end
-plot([meanCurve(:,1); meanCurve(1,1)], [meanCurve(:,2); meanCurve(1,2)],'k','LineWidth',2);
+plot([meanCurve(:,1); meanCurve(1,1)], [meanCurve(:,2); meanCurve(1,2)],'k','LineWidth',2,'DisplayName','mean curve');
 
 %xlabel('x'); ylabel('y');
 exportgraphics(gcf,'Figures_vdp/time_param/fig_frechet_mean.pdf','ContentType','vector');
