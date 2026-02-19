@@ -30,7 +30,7 @@ set(groot, ...
 % Choose alpha and beta values to explore. Gamma will be chosen relative
 % to the Hopf threshold gamma_H to ensure oscillations.
 
-alphaN = 6;
+alphaN = 1;
 alpha_low = 0.2;
 alpha_high = 0.6;
 
@@ -38,7 +38,7 @@ betaN = 1;
 beta_low = 0.1;
 beta_high = 2;
 
-gamma_multN = 1;
+gamma_multN = 2;
 gamma_mult_low = 1.1;
 gamma_mult_high = 2;
 
@@ -317,7 +317,7 @@ for k = 1:Na
 end
 hMean = plot(meanCurve(1,1), meanCurve(1,2), 'ko', 'MarkerFaceColor','k', 'MarkerSize', 9, 'DisplayName','tracker');
 fprintf('Animation running... press Ctrl-C in the MATLAB window to stop.\n');
-
+legend();
 
 %% ================================================================
 %   SNAPSHOT EXPORT 
