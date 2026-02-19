@@ -317,7 +317,6 @@ for k = 1:Na
 end
 hMean = plot(meanCurve(1,1), meanCurve(1,2), 'ko', 'MarkerFaceColor','k', 'MarkerSize', 9, 'DisplayName','tracker');
 fprintf('Animation running... press Ctrl-C in the MATLAB window to stop.\n');
-legend();
 
 %% ================================================================
 %   SNAPSHOT EXPORT 

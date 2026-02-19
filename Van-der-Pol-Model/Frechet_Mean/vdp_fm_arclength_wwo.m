@@ -26,7 +26,7 @@ useColor = true;
 random_samples = true;
 a = -1.0;
 b = 1.0;
-Na = 15;
+Na = 1;
 nFrames = 9;                  % number of snapshots, 0 if to be skipped
 
 
