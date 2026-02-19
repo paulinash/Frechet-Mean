@@ -30,7 +30,7 @@ e_base = 0;
 
 % ---------- PICK ONE PARAMETER TO SAMPLE ----------
 %   Options: 'a', 'b', 'c', 'd', 'e'
-paramToVary = 'e';
+paramToVary = 'c';
 
 switch paramToVary
     case 'a'
@@ -107,6 +107,7 @@ for k = 1:Na
     raw_time_samples{k}.t   = tseg;
 
     periods(k) = tseg(end) - tseg(1);
+    fprintf('Period of curve %d: %.4f \n', k, periods(k));
 
     % get velocities of sample curves
     vx = gradient(seg(:,1), tseg);
@@ -282,6 +283,7 @@ sp_m(sp_m < 1e-12) = 1e-12;
 dt_m = ds_m ./ sp_m;
 cumt_mean = [0; cumsum(dt_m)];
 cumt_mean = cumt_mean * (meanPeriod / cumt_mean(end));
+fprintf('Intrinsic mean period: %.4f \n', sum(dt_m));
 
 fprintf("Animation running... Press Ctrl+C to stop.\n");
 

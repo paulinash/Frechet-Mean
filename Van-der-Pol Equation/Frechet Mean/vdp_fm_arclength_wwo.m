@@ -26,7 +26,7 @@ useColor = true;
 random_samples = true;
 a = -1.0;
 b = 1.0;
-Na = 10;
+Na = 3;
 nFrames = 9;                  % number of snapshots, 0 if to be skipped
 
 
@@ -113,6 +113,7 @@ for k = 1:Na
     % Print curve characteristics
     fprintf('I=%.2f : period dur=%.3f \n', a_vals(k), periods(k));
 end
+
 fprintf("Mean period = %.6f\n", mean(periods));
 
 %% ================================================================
@@ -290,9 +291,9 @@ if dynamics
 
     dt_m = ds_m ./ sp_m;
     cumt_mean = [0; cumsum(dt_m)];
-
+    fprintf('Mean intrinsic period: %.4f', sum(dt_m));
     meanPeriod = mean(periods);  % you computed earlier too
-    %cumt_mean = cumt_mean * (meanPeriod / cumt_mean(end));
+    cumt_mean = cumt_mean * (meanPeriod / cumt_mean(end)); %unclear if rescale is sensible here
 
     paramMean = cumt_mean;
 
@@ -314,7 +315,7 @@ end
 
 
 %% ================================================================
-%   SNAPSHOT EXPORT (6 frames) – put THIS right before the while true loop
+%   SNAPSHOT EXPORT 
 %% ================================================================
 outDir = 'Figures_vdp/arc_param';
 if ~exist(outDir,'dir'); mkdir(outDir); end

@@ -30,11 +30,6 @@ set(groot, ...
 % Choose alpha and beta values to explore. Gamma will be chosen relative
 % to the Hopf threshold gamma_H to ensure oscillations.
 
-% old
-
-
-
-% new
 alphaN = 10;
 alpha_low = 0.2;
 alpha_high = 0.6;
@@ -51,12 +46,9 @@ gamma_mult_high = 2;
 rng(123);
 
 alpha_vals = alpha_low + (alpha_high - alpha_low)*rand(1,alphaN);
-beta_vals = beta_low + (beta_high - beta_low)*rand(1,betaN)
-gamma_mults = gamma_mult_low + (gamma_mult_high - gamma_mult_low)*rand(1,gamma_multN)
-alpha_vals = [0.2,0.3,0.4,0.5,0.6];
-alpha_vals = linspace(0.2,0.6,10);
-fmt=['alpha =' repmat(' %.4f',1,numel(alpha_vals))];
-fprintf(fmt,alpha_vals)
+beta_vals = beta_low + (beta_high - beta_low)*rand(1,betaN);
+gamma_mults = gamma_mult_low + (gamma_mult_high - gamma_mult_low)*rand(1,gamma_multN);
+
 
 % Compose parameter list (all combinations)
 paramList = [];
@@ -84,7 +76,7 @@ for k=1:Na
 end
 
 % Simulation time / solver settings
-Tfinal = 500;      % make long enough to let transients die
+Tfinal = 2000;      % make long enough to let transients die
 dt     = 0.02;
 tspan  = 0:dt:Tfinal;
 M      = 600;      % number of geometric samples per curve (perimeter points)
@@ -92,6 +84,10 @@ M      = 600;      % number of geometric samples per curve (perimeter points)
 % Frechet mean settings
 maxIter = 20;
 tol     = 1e-8;
+
+% Snapshot settings
+nFrames = 6;
+
 
 % Peak detection settings (to extract last single period)
 minProm = 1e-3;
@@ -117,7 +113,6 @@ for k = 1:Na
         ];
 
     % initial condition (small predator & prey positive)
-    z0 = [0.5*gamma; 0.5]; % start somewhere positive (scaled with gamma helps)
     z0 = [0.5;0.5];
     % Integrate
     [t,z] = ode45(rm, tspan, z0);
@@ -232,7 +227,7 @@ for k = 1:Na
 end
 
 meanSpeed = mean(allSpeeds,1).';   % M x 1
-
+%meanSpeed = exp(mean(log(allSpeeds),1)).'; geometric mean
 
 %% ====================== PREPARE FOR ANIMATION (TIME-REPARAMETRIZE) ==========
 % For each aligned curve, rebuild a periodic (M+1) array and compute
@@ -279,7 +274,9 @@ sp_m = meanSpeed;
 sp_m(sp_m < 1e-12) = 1e-12;
 dt_m = ds_m ./ sp_m;
 cumt_mean = [0; cumsum(dt_m)];
-%cumt_mean = cumt_mean * (meanPeriod / cumt_mean(end));
+cumt_mean = cumt_mean * (meanPeriod / cumt_mean(end));
+mean_period_intrinsic = sum(ds_m ./ sp_m);
+fprintf('Intrinsic mean period: %.4f \n', mean_period_intrinsic);
 
 %% ====================== PLOT + ANIMATE ==================================
 figure('Color','w','Position',[50 50 1200 700]); hold on; axis equal; grid on;
@@ -294,6 +291,21 @@ for k = 1:Na
 end
 plot([meanCurve(:,1); meanCurve(1,1)], [meanCurve(:,2); meanCurve(1,2)], 'k', 'LineWidth', 2.2, 'DisplayName','mean curve');
 
+% File naming
+filename = 'Figures_rm/fig_frechet_mean';
+if alphaN > 1
+    filename = sprintf('%s_alpha', filename);
+end
+if betaN > 1
+    filename = sprintf('%s_beta', filename);
+end
+if gamma_multN > 1
+    filename = sprintf('%s_gamma', filename);
+end
+filename = sprintf('%s.pdf', filename);
+
+exportgraphics(gcf,filename,'ContentType','vector');
+
 % create markers for animation
 hCurve = gobjects(Na,1);
 for k = 1:Na
@@ -304,14 +316,59 @@ for k = 1:Na
         'MarkerFaceColor', colors(k,:), 'MarkerSize', 7, 'HandleVisibility','off');
 end
 hMean = plot(meanCurve(1,1), meanCurve(1,2), 'ko', 'MarkerFaceColor','k', 'MarkerSize', 9, 'DisplayName','tracker');
-
-%xlabel('x'); ylabel('y');
-legend('Location','northeastoutside');
-
-exportgraphics(gcf,'Figures_rm/fig_frechet_mean.pdf','ContentType','vector');
-
-
 fprintf('Animation running... press Ctrl-C in the MATLAB window to stop.\n');
+
+
+%% ================================================================
+%   SNAPSHOT EXPORT 
+%% ================================================================
+
+frameTimes = linspace(0, meanPeriod, nFrames+1);
+frameTimes(end) = [];   % avoid duplicating the start point
+
+for f = 1:numel(frameTimes)
+    t_snap = frameTimes(f);
+
+    % --- update all sample trackers ---
+    for k = 1:Na
+        p = cumTime{k};      % (M+1)x1
+        P = posInterp{k};        % (M+1)x2
+
+        Tk   = p(end);
+        tloc = mod(t_snap, Tk);
+
+        px = interp1(p, P(:,1), tloc, 'pchip');
+        py = interp1(p, P(:,2), tloc, 'pchip');
+
+        set(hCurve(k),'XData',px,'YData',py);
+    end
+
+    % --- update mean tracker ---
+    Tm     = cumt_mean(end);
+    tloc_m = mod(t_snap, Tm);
+
+    mx = interp1(cumt_mean, Cw_mean(:,1), tloc_m, 'pchip');
+    my = interp1(cumt_mean, Cw_mean(:,2), tloc_m, 'pchip');
+
+    set(hMean,'XData',mx,'YData',my);
+
+    drawnow;
+    % File naming
+    filename = 'Figures_rm/fig_frechet_mean';
+    if alphaN > 1
+        filename = sprintf('%s_alpha', filename);
+    end
+    if betaN > 1
+        filename = sprintf('%s_beta', filename);
+    end
+    if gamma_multN > 1
+        filename = sprintf('%s_gamma', filename);
+    end
+    filename = sprintf('%s_snapshot_%02d.pdf', filename, f);
+
+    exportgraphics(gcf, filename,'ContentType','vector');
+end
+
 
 %% Endless animation loop
 t_global = 0;
