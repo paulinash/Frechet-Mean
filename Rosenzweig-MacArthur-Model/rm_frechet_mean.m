@@ -30,7 +30,7 @@ set(groot, ...
 % Choose alpha and beta values to explore. Gamma will be chosen relative
 % to the Hopf threshold gamma_H to ensure oscillations.
 
-alphaN = 10;
+alphaN = 6;
 alpha_low = 0.2;
 alpha_high = 0.6;
 
