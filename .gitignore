@@ -42,5 +42,5 @@ codegen/
 # Ignore figures
 Morris-Lecar-Model/refactor/figures/
 Rosenzweig-MacArthur-Model/Figures_rm/
-Van-der-Pol Equation/Frechet Mean/Figures_vdp/arc_param/
-Van-der-Pol Equation/Frechet Mean/Figures_vdp/time_param/
+Van-der-Pol-Equation/Frechet_Mean/Figures_vdp/arc_param/
+Van-der-Pol-Equation/Frechet_Mean/Figures_vdp/time_param/
