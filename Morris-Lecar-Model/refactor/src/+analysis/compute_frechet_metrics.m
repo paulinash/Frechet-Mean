@@ -25,6 +25,10 @@ end
 %% Fréchet variance (empirical): mean squared distance to mean
 frechetVar = mean(d_to_mean.^2);
 
+%% Normalized min distance between mean and curves
+Dmin_mean = min(d_to_mean);
+Dmin_mean_normalized = Dmin_mean / sqrt(frechetVar);
+
 % opts for Frechet medoid and pairwise distances
 dopts = struct();
 dopts.allowShift = opts.pairwise.allowShift;
@@ -141,6 +145,13 @@ else
     medoidC   = curvesAligned{medoidIdx};
 end
 
+% Minimal normalized distance to medoid
+d_to_medoid = D(medoidIdx, :);
+d_to_medoid(medoidIdx) = [];
+Dmin_medoid = min(d_to_medoid);
+Dmin_medoid_normalized = Dmin_medoid / sqrt(bestCost);
+
+% Distance medoid to mean
 d_medoid_to_mean = analysis.curve_distance(medoidC, meanC, dopts);
 if frechetVar > 0
     varRatio_medoid = bestCost / frechetVar;
@@ -184,6 +195,7 @@ metrics.N = N;
 metrics.dist = struct();
 metrics.dist.toMean = d_to_mean;
 metrics.dist.frechetVar = frechetVar;
+metrics.dist.Dmin_mean_normalized = Dmin_mean_normalized;
 
 metrics.pairwise = struct();
 metrics.pairwise.d = pairwiseD;
@@ -194,6 +206,8 @@ metrics.medoid = struct();
 metrics.medoid.idx = medoidIdx;         % index of frechet medoid
 metrics.medoid.curve = medoidC;         % Frechet medoid
 metrics.medoid.cost = bestCost;         % corresponds to frechet Variance for medoid
+metrics.medoid.Dmin_medoid = Dmin_medoid;
+metrics.medoid.Dmin_medoid_normalized = Dmin_medoid_normalized;
 metrics.medoid.d_to_mean = d_medoid_to_mean; % distance between frechet medoid and frechet mean
 metrics.medoid.varRatio = varRatio_medoid; % ratio between FV(medoid) and FV(mean)
 

@@ -48,5 +48,6 @@ for k = 1:N
 
     fprintf('I=%.4f : burst dur=%.3f, spikes=%d\n', p.I, raw.periods(k), raw.spikeCounts(k));
 end
+fprintf('Mean period = %.2f\n', mean(raw.periods));
 
 end

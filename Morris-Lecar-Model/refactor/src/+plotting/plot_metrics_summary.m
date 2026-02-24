@@ -1,4 +1,4 @@
-function h = plot_metrics_summary(metrics, meanC, plotOpts)
+function h = plot_metrics_summary(metrics, meanC, spikecounts, plotOpts)
 %PLOT_METRICS_SUMMARY Basic quantitative diagnostic plots.
 %
 % Returns struct h with figure handles:
@@ -9,8 +9,10 @@ function h = plot_metrics_summary(metrics, meanC, plotOpts)
 arguments
     metrics (1,1) struct
     meanC   (:,:) double
+    spikecounts (:,:) double
     plotOpts struct = struct()
 end
+
 
 if ~isfield(plotOpts,"export"), plotOpts.export = false; end
 if ~isfield(plotOpts,"outDir"),  plotOpts.outDir  = "figures"; end
@@ -115,15 +117,15 @@ meanC_list = [total_curvature_meanC, bending_energy_meanC];
 title_list = {'Total curvature', 'Bending energy'};
 y_label_list = {'$\int \kappa ds$', '$\int \kappa^2 ds$'};
 
-h.figCurvature_metrics = figure('Color','w','Name','Curvature summary','Position',[280 140 920 520]);
 for counter=1:numel(samples_list)
-    plot_curvature_samples(meanC_list(counter), samples_list{counter}, title_list{counter}, y_label_list{counter}, counter)
+    hfig = plot_curvature_samples(meanC_list(counter), samples_list{counter}, title_list{counter}, y_label_list{counter}, counter);
+    if plotOpts.export
+        exportgraphics(hfig, fullfile(plotOpts.outDir, "metrics_" + title_list{counter} + ".pdf"), ...
+            'ContentType','image', 'Resolution', 600);
+    end
 end
 
-if plotOpts.export
-    exportgraphics(h.figCurvature_metrics, fullfile(plotOpts.outDir, "metrics_curvature.pdf"), ...
-        'ContentType','image', 'Resolution', 600);
-end
+
 
 end
 
@@ -147,30 +149,34 @@ end
 
 
 
-function plot_curvature_samples(meanC, samples, title_bp, y_label, counter)
-subplot(1,2,counter);
+function hfig = plot_curvature_samples(meanC, samples, title_bp, y_label, counter)
+hfig = figure('Color','w','Position',[100 100 600 600]);
 hold on;
 
 % x positions (with jitter for visibility)
 x = ones(size(samples));
-jitter = 0.05 * randn(size(samples));
+jitter = 0.01 * randn(size(samples));
 scatter(x + jitter, samples, 25, 'k', 'filled');
 
 % plot mean in red
 plot(1, meanC, 'r+', 'MarkerSize', 12, 'LineWidth', 2);
 
-grid on;
+ax = gca;
+ax.YGrid = 'on';
+ax.XGrid = 'off';
+ax.GridAlpha = 0.15;   % very light
+ax.LineWidth = 1;
 %title(title_bp, 'Interpreter','none');
 %ylabel(y_label, 'Interpreter','latex');
 
 ax = gca;
-ax.TickLabelInterpreter = 'latex';
+ax.XTick = [];      % remove tick marks
 %set(ax,'XTick',1,'XTickLabel',{'samples'});
 
 ymin = min([samples(:); meanC]);
 ymax = max([samples(:); meanC]);
 ylim([0.9*ymin, 1.1*ymax]);
-xlim([0.7 1.3]);
+xlim([0.9 1.1]);
 
 end
 

@@ -63,6 +63,7 @@ add("Basic","d_to_mean_std",  std(d));
 add("Basic","d_to_mean_min",  min(d));
 add("Basic","d_to_mean_max",  max(d));
 add("Basic","frechetVar", metrics.dist.frechetVar);
+add("Basic","norm min distance to mean", metrics.dist.Dmin_mean_normalized);
 add("Basic","pairwise_mean_sq", metrics.pairwise.mean);
 add("Basic","ratio_meanToMeanPairwise", metrics.pairwise.ratio_meanToMeanPairwise);
 addBlank();
@@ -71,14 +72,10 @@ addBlank();
 addHeader("Medoid");
 add("Medoid","medoid_idx", metrics.medoid.idx);
 add("Medoid","frechetVar_medoid", metrics.medoid.cost);
+add("Medoid","min distance to medoid", metrics.medoid.Dmin_medoid);
+add("Medoid","norm min distance to medoid", metrics.medoid.Dmin_medoid_normalized);
 add("Medoid","distance_Fmedoid_Fmean", metrics.medoid.d_to_mean);
 add("Medoid","ratio_FVmedoid_FVmean", metrics.medoid.varRatio);
-addBlank();
-
-% MODALITY
-addHeader("Modality");
-add("Modality","modality_class", string(metrics.modality.class));
-add("Modality","modality_peaks", metrics.modality.numPeaks);
 addBlank();
 
 % CURVATURE

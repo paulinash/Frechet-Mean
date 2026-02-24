@@ -23,9 +23,9 @@ raw = ml.simulate_and_extract_bursts(S.I.values, p0, S.sim);
 [Cs, vels, arc] = curves.resample_bursts_arclength(raw, S.curve.M);
 
 % 3) validate (optional): require equal spike counts
-if S.validation.requireSameSpikeCount
-    ml.validate_spike_counts(raw);
-end
+%if S.validation.requireSameSpikeCount
+%    ml.validate_spike_counts(raw);
+%end
 
 % 4) Geometric Fréchet mean with shift-alignment along arc length
 [meanC, aligned, alignedVels, fmInfo] = frechet.mean_shift_aligned(Cs, vels, S.fm);
@@ -37,6 +37,10 @@ end
 [meanCumTime, meanPosWrap] = curves.cumtime_from_curve_speed(meanC, meanTimeInfo.meanSp, meanTimeInfo.meanPeriod);
 meanTimeInfo.cumTime = meanCumTime;
 meanTimeInfo.posWrap = meanPosWrap;
+
+
+% Decide output folder TODO!!!!
+S.export.outDir = ml.validate_spike_counts(raw, S.export.outDir);
 
 %% Metrics
 % Geometric Fréchet mean metrics analysis
@@ -67,7 +71,7 @@ colors = utils.make_colors(N, S.plot.useColor);
  
 % Plotting metrics
 if S.plot.metrics
-    plotting.plot_metrics_summary(metrics, meanC, S.export);
+    plotting.plot_metrics_summary(metrics, meanC, raw.spikeCounts, S.export);
 end
 
 
