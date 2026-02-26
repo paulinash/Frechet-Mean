@@ -26,7 +26,7 @@ useColor = true;
 random_samples = true;
 a = -1.0;
 b = 1.0;
-Na = 10;
+Na = 50;
 nFrames = 9;                  % number of snapshots, 0 if to be skipped
 
 
@@ -122,6 +122,8 @@ fprintf("Mean period = %.6f\n", mean(periods));
 aligned = curves_res;
 alignedVel = vel_time;
 tauGrid = linspace(0,1,M);
+prevEnergy = NaN;
+
 
 % Initial guess for mean curve: pointwise average
 meanCurve = zeros(M,2);
@@ -133,7 +135,8 @@ meanCurve = meanCurve / Na;
 % Iterative Karcher mean
 for iter = 1:maxIter
     mean_old = meanCurve;
-    
+    energy_k = zeros(Na,1);
+ 
     % Iterate over each curve
     for k = 1:Na
         C = curves_res{k}; bestScore = Inf;
@@ -155,8 +158,13 @@ for iter = 1:maxIter
         sq_shift = mod(sq(1:end-1) + bestTau, 1);
         alignedVel{k} = interp1(sq(1:end-1), vel_time{k}, sq_shift, 'pchip');
         fprintf('Curve %d best rotation tau = %.4f (error = %.6f)\n', k, bestTau, bestScore);
+
+        % Store current energy for stopping criterion
+        energy_k(k) = bestScore;
     end
-    
+    % Current energy
+    currEnergy = mean(energy_k);
+
     % Compute new mean
     meanCurve = zeros(M,2);
     for k = 1:Na
@@ -165,12 +173,14 @@ for iter = 1:maxIter
     meanCurve = meanCurve / Na;
 
     % Check for convergence
-    relChange = norm(meanCurve(:)-mean_old(:)) / (norm(mean_old(:))+eps);
-    fprintf("Iter %d: rel change = %.3e\n", iter, relChange);
-    if relChange < tol
+    relEnergyDrop = abs(currEnergy - prevEnergy) / (prevEnergy + eps);
+    fprintf("Iter %d: rel energy drop = %.3e\n", iter, relEnergyDrop);
+    if relEnergyDrop < tol
         fprintf("Converged.\n"); 
         break; 
     end
+
+    prevEnergy = currEnergy;
 end
 
 %% ================================================================

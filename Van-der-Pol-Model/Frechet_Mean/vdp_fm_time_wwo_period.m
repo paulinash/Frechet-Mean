@@ -99,6 +99,7 @@ aligned = curves_res;
 sq   = linspace(0,1,M+1);
 sq   = sq(1:end-1);
 tauGrid = linspace(0,1,M);
+prevEnergy = NaN;
 
 % Initial mean 
 meanCurve = zeros(M,2);
@@ -109,6 +110,8 @@ meanCurve = meanCurve / Na;
 
 for iter = 1:maxIter
     mean_old = meanCurve;
+
+    energy_k = zeros(Na,1);
 
     % ------------------------------------------------------------
     % ALIGN CURVES TO CURRENT MEAN
@@ -132,20 +135,25 @@ for iter = 1:maxIter
 
         sShift = mod(sq + bestTau,1);
         aligned{k} = interp1(sq, C, sShift,'pchip');
-    end
 
-    % ------------------------------------------------------------
-    % UPDATE MEAN
-    % ------------------------------------------------------------
+        % Store current energy for stopping criterion
+        energy_k(k) = bestScore;
+    end
+    % Current energy
+    currEnergy = mean(energy_k);
+    
+    % Update Mean
     meanCurve = mean(cat(3,aligned{:}),3);
 
     % convergence check
-    relChange = norm(meanCurve(:)-mean_old(:)) / (norm(mean_old(:))+eps);
-    fprintf('Iter %d: rel change = %.3e\n',iter,relChange);
+    relEnergyDrop = abs(currEnergy - prevEnergy) / (prevEnergy + eps);
+    fprintf('Iter %d: rel energy drop = %.3e\n',iter,relEnergyDrop);
 
-    if relChange < tol
+    if relEnergyDrop < tol
+        fprintf("Converged. \n")
         break
     end
+    prevEnergy = currEnergy;
 end
 
 % mean period

@@ -52,8 +52,20 @@ add = @(g,n,v) addRow(g,n,v);
 addHeader = @(g) addRow(g, upper(string(g)), "");  % group header row
 addBlank  = @() addRow("", "", "");                % blank separator row
 
+
+% --- timestamp ---
+timestamp = datetime('now','Format','yyyy-MM-dd HH:mm:ss');
+
 % --- build rows ---
 d = metrics.dist.toMean;
+
+
+% METADATA
+addHeader("Metadata");
+add("Metadata","created_at", timestamp);
+add("Metadata","created_at_timezone", string(datetime('now','TimeZone','local').TimeZone));
+addBlank();
+
 
 % BASIC
 addHeader("Basic");

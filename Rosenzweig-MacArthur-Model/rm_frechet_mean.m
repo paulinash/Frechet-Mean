@@ -30,15 +30,15 @@ set(groot, ...
 % Choose alpha and beta values to explore. Gamma will be chosen relative
 % to the Hopf threshold gamma_H to ensure oscillations.
 
-alphaN = 1;
+alphaN = 3;
 alpha_low = 0.2;
 alpha_high = 0.6;
 
-betaN = 1;
+betaN = 3;
 beta_low = 0.1;
 beta_high = 2;
 
-gamma_multN = 10;
+gamma_multN = 3;
 gamma_mult_low = 1.1;
 gamma_mult_high = 2;
 
@@ -166,6 +166,7 @@ end
 aligned = curves_res;
 alignedVel = vel_time;
 tauGrid = linspace(0,1,M);
+prevEnergy = NaN;
 
 % Initial guess: simple pointwise average (on the arclength grid)
 meanCurve = zeros(M,2);
@@ -177,6 +178,8 @@ meanCurve = meanCurve / Na;
 % Karcher mean iterations: align by circular shift (time/phase shift on the arclength grid)
 for iter = 1:maxIter
     mean_old = meanCurve;
+
+    energy_k = zeros(Na,1);
 
     % Align each curve to current mean by best circular shift
     for k = 1:Na
@@ -198,7 +201,10 @@ for iter = 1:maxIter
         sq_shift = mod(sq(1:end-1) + bestTau, 1);
         alignedVel{k} = interp1(sq(1:end-1), vel_time{k}, sq_shift, 'pchip');
 
+        energy_k(k) = bestScore;
     end
+
+    currEnergy = mean(energy_k);
 
     % Recompute mean from aligned curves
     meanCurve = zeros(M,2);
@@ -208,12 +214,13 @@ for iter = 1:maxIter
     meanCurve = meanCurve / Na;
 
     % convergence check
-    relChange = norm(meanCurve(:) - mean_old(:)) / (norm(mean_old(:)) + eps);
-    fprintf('Iter %d: rel change = %.3e\n', iter, relChange);
-    if relChange < tol
+    relEnergyDrop = abs(currEnergy - prevEnergy) / (prevEnergy+eps);
+    fprintf('Iter %d: rel change = %.3e\n', iter, relEnergyDrop);
+    if relEnergyDrop < tol
         fprintf('Converged at iter %d.\n', iter);
         break;
     end
+    prevEnergy = currEnergy;
 end
 
 %% ====================== COMPUTE MEAN PERIOD & MEAN VELOCITY ======================

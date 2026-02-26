@@ -39,7 +39,7 @@ meanTimeInfo.cumTime = meanCumTime;
 meanTimeInfo.posWrap = meanPosWrap;
 
 
-% Decide output folder TODO!!!!
+% Decide output folder
 S.export.outDir = ml.validate_spike_counts(raw, S.export.outDir);
 
 %% Metrics

@@ -67,6 +67,8 @@ info = struct();
 info.taus = zeros(N, opts.maxIter);
 info.errors = zeros(N, opts.maxIter);
 info.meanChange = zeros(opts.maxIter,1);
+info.energy = zeros(opts.maxIter,1); % Frechet energy
+prevEnergy = NaN;
 
 
 %% Fréchet mean iteration
@@ -106,6 +108,11 @@ for iter = 1:opts.maxIter % Iterate until convergence
         fprintf('iter %d/%d, curve %d: tau=%.4f, err=%.6g\n', iter, opts.maxIter, k, bestTau, bestErr);
     end
 
+    % Compute Fréchet energy for this iteration
+    currEnergy = mean(info.errors(:,iter));
+    info.energy(iter) = currEnergy;
+
+
     % Update mean using mean of optimal aligned curves
     meanC = mean(cat(3, aligned{:}), 3);
 
@@ -113,15 +120,23 @@ for iter = 1:opts.maxIter % Iterate until convergence
     relChange = norm(meanC(:) - mean_old(:)) / (norm(mean_old(:)) + eps);
     info.meanChange(iter) = relChange;
 
-    if relChange < opts.tol
+    
+    % Relative energy decrease
+    relEnergyDrop = abs(prevEnergy - currEnergy) / (prevEnergy + eps);
+    
+    if relEnergyDrop < opts.tol
         info.nIter = iter;
         info.taus = info.taus(:,1:iter);
         info.errors = info.errors(:,1:iter);
         info.meanChange = info.meanChange(1:iter);
-        fprintf('Fréchet mean converged in %d iterations (relChange=%.3g).\n', iter, relChange);
-        return;
+        info.energy = info.energy(1:iter);
+        fprintf('Fréchet mean converged in %d iterations (energy drop=%.3g).\n', ...
+        iter, relEnergyDrop);
+        return
     end
+    prevEnergy = currEnergy;
 end
+
 
 info.nIter = opts.maxIter;
 fprintf('Fréchet mean reached maxIter=%d (last relChange=%.3g).\n', opts.maxIter, info.meanChange(end));
