@@ -3,6 +3,18 @@ function vdp_solutions()
 % Save this file as vdp_interactive.m and run by typing: vdp_interactive
 clear; close all; clc;
 
+set(groot, ...
+    'DefaultTextInterpreter','latex', ...
+    'DefaultAxesTickLabelInterpreter','latex', ...
+    'DefaultLegendInterpreter','latex', ...
+    'DefaultAxesFontName','Times', ...
+    'DefaultTextFontName','Times', ...
+    'DefaultAxesFontSize', 12, ...
+    'DefaultTextFontSize', 12, ...
+    'DefaultLegendFontSize', 11, ...
+    'DefaultLineLineWidth', 1.2, ...
+    'DefaultFigureColor','w');
+
 % Parameters
 epsilon = 0.1;                      % slow timescale
 a = -0.5;
@@ -29,7 +41,7 @@ fig = figure('Name','Van der Pol Solutions','NumberTitle','off','Units','normali
 ax = axes('Parent', fig);
 hold(ax, 'on');
 
-axis(ax, [-3 3 -4 4]);
+axis(ax, [-2.5 2.5 -2 2]);
 grid on;
 
 vdp_curve = plot(ax, x_ss, y_ss, 'LineWidth', 2, 'DisplayName', 'Limit cycle');
@@ -39,8 +51,6 @@ vdp_curve = plot(ax, x_ss, y_ss, 'LineWidth', 2, 'DisplayName', 'Limit cycle');
 nArrows = 4;
 
 % pick four roughly equally spaced locations
-idx_arrows = round(linspace(1, length(x_ss)-10, nArrows))
-length(x_ss)-10
 idx_arrows = [1,17,35, 55];
 
 pt1 = ax.Position;
@@ -69,6 +79,7 @@ xgrid = linspace(-3,3,400);
 y_nullcline = xgrid.^3/3 - xgrid;
 plot(ax, xgrid, y_nullcline, 'k--', 'LineWidth', 1.5, 'DisplayName', 'x''=0');
 
-
+exportgraphics(gcf, 'Figures_vdp/vdp_system.pdf', ...
+        'ContentType','vector');
 
 end
