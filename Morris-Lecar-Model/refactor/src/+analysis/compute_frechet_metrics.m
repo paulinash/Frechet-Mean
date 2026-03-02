@@ -17,17 +17,14 @@ opts = fill_defaults(opts);
 N = numel(curvesAligned);
 
 %% Distance: aligned curves to mean curve 
-d_to_mean = zeros(N,1);
+d_to_mean = zeros(N,1); 
 for i = 1:N
+    % computing d (not d^2)
     d_to_mean(i) = analysis.curve_distance(curvesAligned{i}, meanC);
 end
 
 %% Fréchet variance (empirical): mean squared distance to mean
 frechetVar = mean(d_to_mean.^2);
-
-%% Normalized min distance between mean and curves
-Dmin_mean = min(d_to_mean);
-Dmin_mean_normalized = Dmin_mean / sqrt(frechetVar);
 
 % opts for Frechet medoid and pairwise distances
 dopts = struct();
@@ -149,15 +146,13 @@ end
 d_to_medoid = D(medoidIdx, :);
 d_to_medoid(medoidIdx) = [];
 Dmin_medoid = min(d_to_medoid);
+Dmin_medoid = Dmin_medoid^2;
 Dmin_medoid_normalized = Dmin_medoid / sqrt(bestCost);
 
 % Distance medoid to mean
 d_medoid_to_mean = analysis.curve_distance(medoidC, meanC, dopts);
-if frechetVar > 0
-    varRatio_medoid = bestCost / frechetVar;
-else
-    varRatio_medoid = NaN;
-end
+d_medoid_to_mean = d_medoid_to_mean^2;
+
 
 
 
@@ -193,9 +188,8 @@ metrics = struct();
 metrics.N = N;
 
 metrics.dist = struct();
-metrics.dist.toMean = d_to_mean;
-metrics.dist.frechetVar = frechetVar;
-metrics.dist.Dmin_mean_normalized = Dmin_mean_normalized;
+metrics.dist.toMean = d_to_mean.^2; %squared
+metrics.dist.frechetVar = frechetVar; %squared
 
 metrics.pairwise = struct();
 metrics.pairwise.d = pairwiseD;
@@ -205,11 +199,10 @@ metrics.pairwise.ratio_meanToMeanPairwise = frechetVar / avgPairwise;  % scale c
 metrics.medoid = struct();
 metrics.medoid.idx = medoidIdx;         % index of frechet medoid
 metrics.medoid.curve = medoidC;         % Frechet medoid
-metrics.medoid.cost = bestCost;         % corresponds to frechet Variance for medoid
-metrics.medoid.Dmin_medoid = Dmin_medoid;
-metrics.medoid.Dmin_medoid_normalized = Dmin_medoid_normalized;
+metrics.medoid.cost = bestCost;         % frechet Variance for medoid, squared
+metrics.medoid.Dmin_medoid = Dmin_medoid; % squared
+metrics.medoid.Dmin_medoid_normalized = Dmin_medoid_normalized; % squared 
 metrics.medoid.d_to_mean = d_medoid_to_mean; % distance between frechet medoid and frechet mean
-metrics.medoid.varRatio = varRatio_medoid; % ratio between FV(medoid) and FV(mean)
 
 if ~isempty(candIdx)
     metrics.medoid.candidates = candIdx;
