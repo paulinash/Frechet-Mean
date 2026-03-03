@@ -70,17 +70,20 @@ addBlank();
 % BASIC
 addHeader("Basic");
 add("Basic","N", metrics.N);
-add("Basic","d_to_mean_min",  min(d));
+add("Basic","delta_F",  min(d));
 add("Basic","frechetVar", metrics.dist.frechetVar);
+add("Basic","delta_F", metrics.dist.Dmin_mean);
+add("Basic","delta_F normalized", metrics.dist.Dmin_mean_normalized);
+
 addBlank();
 
 % MEDOID
 addHeader("Medoid");
 add("Medoid","medoid_idx", metrics.medoid.idx);
 add("Medoid","frechetVar_medoid", metrics.medoid.cost);
-add("Medoid","min distance to medoid", metrics.medoid.Dmin_medoid);
-add("Medoid","norm min distance to medoid", metrics.medoid.Dmin_medoid_normalized);
-add("Medoid","distance_Fmedoid_Fmean", metrics.medoid.d_to_mean);
+add("Medoid","delta_F med", metrics.medoid.Dmin_medoid);
+add("Medoid","detla_F med normalized", metrics.medoid.Dmin_medoid_normalized);
+add("Medoid","d(med,mean)^2", metrics.medoid.d_to_mean);
 addBlank();
 
 % CURVATURE

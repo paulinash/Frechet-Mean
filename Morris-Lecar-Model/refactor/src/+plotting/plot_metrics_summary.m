@@ -22,36 +22,6 @@ if plotOpts.export && ~isfolder(plotOpts.outDir)
     mkdir(plotOpts.outDir);
 end
 
-%% 1) Histograms distance vector
-h = struct();
-h.figHistograms = figure('Color','w','Name','Distances to mean','Position',[200 100 800 520]);
-t = tiledlayout(1,2,'TileSpacing','compact','Padding','compact');
-
-% a) Distances to mean histogram
-ax1 = nexttile(t,1);
-histogram(ax1, metrics.dist.toMean, metrics.modality.edges);
-grid(ax1,'on');
-xlabel(ax1,'$d(C_i, \mu)$'); ylabel(ax1,'count');
-title(ax1,'Distances to Frechet mean', 'Interpreter','latex');
-
-% show modality classification
-txt = sprintf('Modality: %s (peaks=%d)', string(metrics.modality.class), metrics.modality.numPeaks);
-y = ylim(ax1); x = xlim(ax1);
-text(ax1, x(1) + 0.05*(x(2)-x(1)), y(1) + 0.90*(y(2)-y(1)), txt);
-hold(ax1,'off');
-
-% b) Pairwise distance histogram
-ax2 = nexttile(t,2);
-histogram(ax2, metrics.pairwise.d, 10);
-grid(ax2,'on');
-xlabel(ax2,'$d(C_i, C_j)$'); ylabel(ax2,'count');
-title(ax2,'Pairwise distances');
-
-if plotOpts.export
-    exportgraphics(h.figHistograms, fullfile(plotOpts.outDir, "metrics_histogram_distances.pdf"), ...
-        'ContentType','image', 'Resolution', 600);
-end
-
 
 
 %% 2) Medoid vs. Mean

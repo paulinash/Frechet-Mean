@@ -26,6 +26,10 @@ end
 %% Fréchet variance (empirical): mean squared distance to mean
 frechetVar = mean(d_to_mean.^2);
 
+%% Minimal distance mean to sample
+Dmin_mean = min(d_to_mean.^2);
+Dmin_mean_normalized = Dmin_mean / frechetVar;
+
 % opts for Frechet medoid and pairwise distances
 dopts = struct();
 dopts.allowShift = opts.pairwise.allowShift;
@@ -147,7 +151,7 @@ d_to_medoid = D(medoidIdx, :);
 d_to_medoid(medoidIdx) = [];
 Dmin_medoid = min(d_to_medoid);
 Dmin_medoid = Dmin_medoid^2;
-Dmin_medoid_normalized = Dmin_medoid / sqrt(bestCost);
+Dmin_medoid_normalized = Dmin_medoid / bestCost;
 
 % Distance medoid to mean
 d_medoid_to_mean = analysis.curve_distance(medoidC, meanC, dopts);
@@ -190,6 +194,8 @@ metrics.N = N;
 metrics.dist = struct();
 metrics.dist.toMean = d_to_mean.^2; %squared
 metrics.dist.frechetVar = frechetVar; %squared
+metrics.dist.Dmin_mean = Dmin_mean;
+metrics.dist.Dmin_mean_normalized = Dmin_mean_normalized;
 
 metrics.pairwise = struct();
 metrics.pairwise.d = pairwiseD;
