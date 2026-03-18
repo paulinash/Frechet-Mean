@@ -122,26 +122,49 @@ fprintf("Mean period = %.6f\n", mean(periods));
 aligned = curves_res;
 alignedVel = vel_time;
 tauGrid = linspace(0,1,M);
-prevEnergy = NaN;
-
 
 % Initial guess for mean curve: pointwise average
 meanCurve = zeros(M,2);
 for k = 1:Na
-        meanCurve = meanCurve + curves_res{k}; 
+    meanCurve = meanCurve + curves_res{k}; 
 end
 meanCurve = meanCurve / Na;
 
+% === ADDED: Initial alignment to mu_0 to get true F^(N)(mu_0) ===
+energy_k = zeros(Na,1);
+for k = 1:Na
+    C = curves_res{k}; bestScore = Inf;
+    for tau = tauGrid
+        sq_shift = mod(sq(1:end-1) + tau, 1);
+        Csh = interp1(sq(1:end-1), C, sq_shift, 'pchip');
+        score = mean(sum((Csh - meanCurve).^2,2));
+        if score < bestScore
+            bestScore = score;
+            bestCurve = Csh;
+            bestTau = tau;
+        end
+    end
+    aligned{k} = bestCurve;
+    sq_shift = mod(sq(1:end-1) + bestTau, 1);
+    alignedVel{k} = interp1(sq(1:end-1), vel_time{k}, sq_shift, 'pchip');
+    energy_k(k) = bestScore;
+end
+prevEnergy = mean(energy_k);
+
 % Iterative Karcher mean
 for iter = 1:maxIter
-    mean_old = meanCurve;
+
+    % === STEP 1: Update mean from currently aligned curves ===
+    meanCurve = zeros(M,2);
+    for k = 1:Na
+        meanCurve = meanCurve + aligned{k}; 
+    end
+    meanCurve = meanCurve / Na;
+
+    % === STEP 2: Re-align all curves to the new mean ===
     energy_k = zeros(Na,1);
- 
-    % Iterate over each curve
     for k = 1:Na
         C = curves_res{k}; bestScore = Inf;
-
-        % Find best alignment to mean curve for each curve
         for tau = tauGrid
             sq_shift = mod(sq(1:end-1) + tau, 1);
             Csh = interp1(sq(1:end-1), C, sq_shift, 'pchip');
@@ -153,24 +176,14 @@ for iter = 1:maxIter
             end
         end
         aligned{k} = bestCurve;
-
-        % align velocity consistently
         sq_shift = mod(sq(1:end-1) + bestTau, 1);
         alignedVel{k} = interp1(sq(1:end-1), vel_time{k}, sq_shift, 'pchip');
         fprintf('Curve %d best rotation tau = %.4f (error = %.6f)\n', k, bestTau, bestScore);
-
-        % Store current energy for stopping criterion
         energy_k(k) = bestScore;
     end
-    % Current energy
-    currEnergy = mean(energy_k);
 
-    % Compute new mean
-    meanCurve = zeros(M,2);
-    for k = 1:Na
-        meanCurve = meanCurve + aligned{k}; 
-    end
-    meanCurve = meanCurve / Na;
+    % === STEP 3: True Fréchet functional F^(N)(mu_{n+1}) ===
+    currEnergy = mean(energy_k);
 
     % Check for convergence
     relEnergyDrop = abs(currEnergy - prevEnergy) / (prevEnergy + eps);
@@ -182,6 +195,7 @@ for iter = 1:maxIter
 
     prevEnergy = currEnergy;
 end
+
 
 %% ================================================================
 %   MEAN PERIOD AND MEAN VELOCITY

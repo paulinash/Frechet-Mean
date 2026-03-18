@@ -90,72 +90,81 @@ for k = 1:Na
     tU = linspace(tseg(1), tseg(end), M);
     curves_res{k} = interp1(tseg, seg, tU);
 end
-
 %% ================================================================
 % ITERATIVE FRÉCHET / KARCHER MEAN
 %% ================================================================
 aligned = curves_res;
-
 sq   = linspace(0,1,M+1);
 sq   = sq(1:end-1);
 tauGrid = linspace(0,1,M);
-prevEnergy = NaN;
 
-% Initial mean 
+% Initial mean
 meanCurve = zeros(M,2);
 for k = 1:Na
     meanCurve = meanCurve + curves_res{k};
 end
 meanCurve = meanCurve / Na;
 
+% === ADDED: Initial alignment to mu_0 to get true F^(N)(mu_0) ===
+energy_k = zeros(Na,1);
+for k = 1:Na
+    C = curves_res{k};
+    bestScore = Inf;
+    bestTau   = 0;
+    for tau = tauGrid
+        sShift = mod(sq + tau,1);
+        Csh = interp1(sq, C, sShift,'pchip');
+        score = mean(sum((Csh - meanCurve).^2,2));
+        if score < bestScore
+            bestScore = score;
+            bestTau = tau;
+        end
+    end
+    sShift = mod(sq + bestTau,1);
+    aligned{k} = interp1(sq, C, sShift,'pchip');
+    energy_k(k) = bestScore;
+end
+prevEnergy = mean(energy_k);
+
 for iter = 1:maxIter
-    mean_old = meanCurve;
+
+% === MOVED: Update mean first ===
+    meanCurve = mean(cat(3,aligned{:}),3);
 
     energy_k = zeros(Na,1);
-
-    % ------------------------------------------------------------
-    % ALIGN CURVES TO CURRENT MEAN
-    % ------------------------------------------------------------
+% ------------------------------------------------------------
+% RE-ALIGN CURVES TO NEW MEAN
+% ------------------------------------------------------------
     for k = 1:Na
         C = curves_res{k};
-
         bestScore = Inf;
         bestTau   = 0;
-
         for tau = tauGrid
             sShift = mod(sq + tau,1);
             Csh = interp1(sq, C, sShift,'pchip');
-
             score = mean(sum((Csh - meanCurve).^2,2));
             if score < bestScore
                 bestScore = score;
                 bestTau = tau;
             end
         end
-
         sShift = mod(sq + bestTau,1);
         aligned{k} = interp1(sq, C, sShift,'pchip');
-
-        % Store current energy for stopping criterion
+% Store current energy for stopping criterion
         energy_k(k) = bestScore;
     end
-    % Current energy
+% Current energy = true F^(N)(mu_{n+1})
     currEnergy = mean(energy_k);
-    
-    % Update Mean
-    meanCurve = mean(cat(3,aligned{:}),3);
 
-    % convergence check
+% convergence check
     relEnergyDrop = abs(currEnergy - prevEnergy) / (prevEnergy + eps);
     fprintf('Iter %d: rel energy drop = %.3e\n',iter,relEnergyDrop);
-
     if relEnergyDrop < tol
         fprintf("Converged. \n")
         break
     end
     prevEnergy = currEnergy;
 end
-
 % mean period
 meanPeriod = mean(periods);  
 fprintf("Mean period = %.6f\n", meanPeriod);
