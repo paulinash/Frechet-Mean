@@ -67,28 +67,43 @@ info = struct();
 info.taus = zeros(N, opts.maxIter);
 info.errors = zeros(N, opts.maxIter);
 info.meanChange = zeros(opts.maxIter,1);
-info.energy = zeros(opts.maxIter,1); % Frechet energy
-prevEnergy = NaN;
+info.energy = zeros(opts.maxIter,1);
+
+% === ADDED: Initial alignment to mu_0 to get true F^(N)(mu_0) ===
+initErrors = zeros(N,1);
+for k = 1:N
+    bestErr = Inf; bestTau = 0; bestCurve = [];
+    for tau = opts.tauGrid.'
+        sq_shifted = mod(sq + tau, 1);
+        gammaShift = interp1(sq, curves{k}, sq_shifted, 'pchip', 'extrap');
+        err = mean(sum((gammaShift - meanC).^2, 2));
+        if err < bestErr
+            bestErr = err;
+            bestTau = tau;
+            bestCurve = gammaShift;
+        end
+    end
+    aligned{k} = bestCurve;
+    sq_shifted_best = mod(sq + bestTau, 1);
+    alignedVels{k} = interp1(sq, vels{k}, sq_shifted_best, 'pchip', 'extrap');
+    initErrors(k) = bestErr;
+end
+prevEnergy = mean(initErrors);
 
 
 %% Fréchet mean iteration
-for iter = 1:opts.maxIter % Iterate until convergence
+for iter = 1:opts.maxIter
+
+    % === MOVED: Update mean from currently aligned curves first ===
     mean_old = meanC;
-    
-    % Iterate over each curve
+    meanC = mean(cat(3, aligned{:}), 3);
+
+    % Re-align each curve to the new mean
     for k = 1:N
         bestErr = Inf; bestTau = 0; bestCurve = [];
-        
-        % Iterate over each possible shift
         for tau = opts.tauGrid.'
-
-            % Rotate each curve 
             sq_shifted = mod(sq + tau, 1);
-
-            % Interpolate curve onto shifted grid (periodic; extrap ok because mod)
             gammaShift = interp1(sq, curves{k}, sq_shifted, 'pchip', 'extrap');
-
-            % Pointwise distance to currenct mean
             err = mean(sum((gammaShift - meanC).^2, 2));
             if err < bestErr
                 bestErr = err;
@@ -96,8 +111,6 @@ for iter = 1:opts.maxIter % Iterate until convergence
                 bestCurve = gammaShift;
             end
         end
-
-        % Choose best alignment to current mean    
         aligned{k} = bestCurve;
         sq_shifted_best = mod(sq + bestTau, 1);
         alignedVels{k} = interp1(sq, vels{k}, sq_shifted_best, 'pchip', 'extrap');
@@ -108,22 +121,17 @@ for iter = 1:opts.maxIter % Iterate until convergence
         fprintf('iter %d/%d, curve %d: tau=%.4f, err=%.6g\n', iter, opts.maxIter, k, bestTau, bestErr);
     end
 
-    % Compute Fréchet energy for this iteration
+    % Compute true Fréchet energy F^(N)(mu_{n+1})
     currEnergy = mean(info.errors(:,iter));
     info.energy(iter) = currEnergy;
 
-
-    % Update mean using mean of optimal aligned curves
-    meanC = mean(cat(3, aligned{:}), 3);
-
-    % Relative change of old to new mean
+    % Relative change of mean curve
     relChange = norm(meanC(:) - mean_old(:)) / (norm(mean_old(:)) + eps);
     info.meanChange(iter) = relChange;
 
-    
     % Relative energy decrease
     relEnergyDrop = abs(prevEnergy - currEnergy) / (prevEnergy + eps);
-    
+
     if relEnergyDrop < opts.tol
         info.nIter = iter;
         info.taus = info.taus(:,1:iter);
@@ -137,8 +145,8 @@ for iter = 1:opts.maxIter % Iterate until convergence
     prevEnergy = currEnergy;
 end
 
-
 info.nIter = opts.maxIter;
 fprintf('Fréchet mean reached maxIter=%d (last relChange=%.3g).\n', opts.maxIter, info.meanChange(end));
+
 
 end

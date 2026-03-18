@@ -166,7 +166,6 @@ end
 aligned = curves_res;
 alignedVel = vel_time;
 tauGrid = linspace(0,1,M);
-prevEnergy = NaN;
 
 % Initial guess: simple pointwise average (on the arclength grid)
 meanCurve = zeros(M,2);
@@ -175,16 +174,41 @@ for k = 1:Na
 end
 meanCurve = meanCurve / Na;
 
+% === ADDED: Initial alignment to mu_0 to get true F^(N)(mu_0) ===
+energy_k = zeros(Na,1);
+for k = 1:Na
+    C = curves_res{k}; bestScore = Inf;
+    for tau = tauGrid
+        sq_shift = mod(sq(1:end-1) + tau, 1);
+        Csh = interp1(sq(1:end-1), C, sq_shift, 'pchip');
+        score = mean(sum((Csh - meanCurve).^2, 2));
+        if score < bestScore
+            bestScore = score;
+            bestCurve = Csh;
+            bestTau = tau;
+        end
+    end
+    aligned{k} = bestCurve;
+    sq_shift = mod(sq(1:end-1) + bestTau, 1);
+    alignedVel{k} = interp1(sq(1:end-1), vel_time{k}, sq_shift, 'pchip');
+    energy_k(k) = bestScore;
+end
+prevEnergy = mean(energy_k);
+
 % Karcher mean iterations: align by circular shift (time/phase shift on the arclength grid)
 for iter = 1:maxIter
-    mean_old = meanCurve;
+
+% === MOVED: Recompute mean from aligned curves first ===
+    meanCurve = zeros(M,2);
+    for k = 1:Na
+        meanCurve = meanCurve + aligned{k};
+    end
+    meanCurve = meanCurve / Na;
 
     energy_k = zeros(Na,1);
-
-    % Align each curve to current mean by best circular shift
+% Re-align each curve to new mean by best circular shift
     for k = 1:Na
         C = curves_res{k}; bestScore = Inf;
-
         for tau = tauGrid
             sq_shift = mod(sq(1:end-1) + tau, 1);
             Csh = interp1(sq(1:end-1), C, sq_shift, 'pchip');
@@ -195,25 +219,14 @@ for iter = 1:maxIter
                 bestTau = tau;
             end
         end
-
         aligned{k} = bestCurve;
-
         sq_shift = mod(sq(1:end-1) + bestTau, 1);
         alignedVel{k} = interp1(sq(1:end-1), vel_time{k}, sq_shift, 'pchip');
-
         energy_k(k) = bestScore;
     end
-
     currEnergy = mean(energy_k);
 
-    % Recompute mean from aligned curves
-    meanCurve = zeros(M,2);
-    for k = 1:Na
-        meanCurve = meanCurve + aligned{k};
-    end
-    meanCurve = meanCurve / Na;
-
-    % convergence check
+% convergence check
     relEnergyDrop = abs(currEnergy - prevEnergy) / (prevEnergy+eps);
     fprintf('Iter %d: rel change = %.3e\n', iter, relEnergyDrop);
     if relEnergyDrop < tol
