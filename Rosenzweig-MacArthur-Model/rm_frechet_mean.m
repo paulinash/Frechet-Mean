@@ -30,7 +30,7 @@ set(groot, ...
 % Choose alpha and beta values to explore. Gamma will be chosen relative
 % to the Hopf threshold gamma_H to ensure oscillations.
 
-alphaN = 10;
+alphaN = 1;
 alpha_low = 0.2;
 alpha_high = 0.6;
 
@@ -38,7 +38,7 @@ betaN = 1;
 beta_low = 0.1;
 beta_high = 2;
 
-gamma_multN = 1;
+gamma_multN = 10;
 gamma_mult_low = 1.1;
 gamma_mult_high = 2;
 
@@ -295,7 +295,7 @@ sp_m = meanSpeed;
 sp_m(sp_m < 1e-12) = 1e-12;
 dt_m = ds_m ./ sp_m;
 cumt_mean = [0; cumsum(dt_m)];
-cumt_mean = cumt_mean * (meanPeriod / cumt_mean(end));
+%cumt_mean = cumt_mean * (meanPeriod / cumt_mean(end));
 mean_period_intrinsic = sum(ds_m ./ sp_m);
 fprintf('Intrinsic mean period: %.4f \n', mean_period_intrinsic);
 

@@ -23,10 +23,10 @@ set(groot, ...
 epsilon   = 0.1;
 dynamics = true; % false: geometric arc length, true: consider dynamics 
 useColor = true;
-random_samples = true;
+random_samples = false;
 a = -1.0;
 b = 1.0;
-Na = 50;
+Na = 5;
 nFrames = 9;                  % number of snapshots, 0 if to be skipped
 
 
@@ -35,7 +35,8 @@ if random_samples
     rng(123);
     a_vals = a + (b - a) * rand(1, Na);
 else    
-    a_vals = linspace(a,b,Na);
+    a_vals = linspace(a,b,Na+2);
+    a_vals = a_vals(2:end-1);
 end
 
 % Simulation time and timesteps for ODE solver
@@ -318,7 +319,7 @@ if dynamics
     cumt_mean = [0; cumsum(dt_m)];
     fprintf('Mean intrinsic period: %.4f', sum(dt_m));
     meanPeriod = mean(periods);  % you computed earlier too
-    cumt_mean = cumt_mean * (meanPeriod / cumt_mean(end)); %unclear if rescale is sensible here
+    %cumt_mean = cumt_mean * (meanPeriod / cumt_mean(end)); %unclear if rescale is sensible here
 
     paramMean = cumt_mean;
 
