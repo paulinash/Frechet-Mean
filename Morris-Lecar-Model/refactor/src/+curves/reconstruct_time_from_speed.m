@@ -50,7 +50,9 @@ for k = 1:N
 end
 
 % Mean time parametrization: average speed profile + mean period
-meanSp = mean(timeInfo.speeds,1).';
+%meanSp = mean(timeInfo.speeds,1).';
+meanSp = 1./ mean(1./timeInfo.speeds,1).'; % harmonic mean
+
 meanSp(meanSp < 1e-12) = 1e-12;
 meanPeriod = mean(periods);
 

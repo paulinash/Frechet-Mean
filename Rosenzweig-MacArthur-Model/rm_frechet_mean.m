@@ -30,7 +30,7 @@ set(groot, ...
 % Choose alpha and beta values to explore. Gamma will be chosen relative
 % to the Hopf threshold gamma_H to ensure oscillations.
 
-alphaN = 1;
+alphaN = 10;
 alpha_low = 0.2;
 alpha_high = 0.6;
 
@@ -38,7 +38,7 @@ betaN = 1;
 beta_low = 0.1;
 beta_high = 2;
 
-gamma_multN = 10;
+gamma_multN = 1;
 gamma_mult_low = 1.1;
 gamma_mult_high = 2;
 
@@ -247,8 +247,8 @@ for k = 1:Na
     allSpeeds(k,:) = sqrt(sum(V.^2,2));
 end
 
-meanSpeed = mean(allSpeeds,1).';   % M x 1
-%meanSpeed = exp(mean(log(allSpeeds),1)).'; geometric mean
+%meanSpeed = mean(allSpeeds,1).';   % M x 1
+meanSpeed = 1./ mean(1./allSpeeds,1).'; % harmonic mean
 
 %% ====================== PREPARE FOR ANIMATION (TIME-REPARAMETRIZE) ==========
 % For each aligned curve, rebuild a periodic (M+1) array and compute

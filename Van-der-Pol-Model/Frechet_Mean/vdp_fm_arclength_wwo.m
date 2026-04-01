@@ -26,7 +26,7 @@ useColor = true;
 random_samples = false;
 a = -1.0;
 b = 1.0;
-Na = 5;
+Na = 3;
 nFrames = 9;                  % number of snapshots, 0 if to be skipped
 
 
@@ -211,7 +211,8 @@ for k = 1:Na
     V = alignedVel{k};
     allSpeeds(k,:) = sqrt(sum(V.^2,2));
 end
-meanSpeed = mean(allSpeeds,1).';   % M×1
+%meanSpeed = mean(allSpeeds,1).';   % M×1
+meanSpeed = 1./ mean(1./allSpeeds,1).'; % harmonic mean
 
 %% ================================================================
 %   PLOT GEOMETRY + MOVING VELOCITY MARKERS
