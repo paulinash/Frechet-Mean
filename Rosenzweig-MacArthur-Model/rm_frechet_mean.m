@@ -30,15 +30,15 @@ set(groot, ...
 % Choose alpha and beta values to explore. Gamma will be chosen relative
 % to the Hopf threshold gamma_H to ensure oscillations.
 
-alphaN = 3;
+alphaN = 10;
 alpha_low = 0.2;
 alpha_high = 0.6;
 
-betaN = 3;
+betaN = 1;
 beta_low = 0.1;
 beta_high = 2;
 
-gamma_multN = 3;
+gamma_multN = 1;
 gamma_mult_low = 1.1;
 gamma_mult_high = 2;
 
@@ -235,6 +235,7 @@ for iter = 1:maxIter
     end
     prevEnergy = currEnergy;
 end
+
 
 %% ====================== COMPUTE MEAN PERIOD & MEAN VELOCITY ======================
 meanPeriod = mean(periods);

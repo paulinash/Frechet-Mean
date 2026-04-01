@@ -140,6 +140,7 @@ for iter = 1:opts.maxIter
         info.energy = info.energy(1:iter);
         fprintf('Fréchet mean converged in %d iterations (energy drop=%.3g).\n', ...
         iter, relEnergyDrop);
+
         return
     end
     prevEnergy = currEnergy;
@@ -148,5 +149,7 @@ end
 info.nIter = opts.maxIter;
 fprintf('Fréchet mean reached maxIter=%d (last relChange=%.3g).\n', opts.maxIter, info.meanChange(end));
 
-
 end
+
+
+

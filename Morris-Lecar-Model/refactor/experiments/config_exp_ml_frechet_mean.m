@@ -17,18 +17,18 @@ S = struct();
 %S.I.high = 45.3;
 
 % consistent
-S.I.low = 44.8;
-S.I.high = 44.9;
+%S.I.low = 44.8;
+%S.I.high = 44.9;
 
 %inconsistent
-%S.I.low = 44.8;
-%S.I.high = 45.4;
+S.I.low = 44.8;
+S.I.high = 45.4;
 
 %inconsistent
 %S.I.low = 44.8;
 %S.I.high = 45.2;
 
-S.I.N = 5;
+S.I.N = 50;
 S.I.values = linspace(S.I.low, S.I.high, S.I.N);
 
 %% Simulation
