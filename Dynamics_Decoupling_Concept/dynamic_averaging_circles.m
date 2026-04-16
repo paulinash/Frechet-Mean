@@ -60,8 +60,7 @@ plot(s, v1, 'LineWidth',2); hold on;
 plot(s, v2, 'LineWidth',2);
 plot(s, v_mean, '--','LineWidth',2);
 plot(s, v_harm, ':','LineWidth',2);
-xlabel('s'); ylabel('speed');
-title('Speed profiles');
+
 grid on;
 exportFig('speed_profiles.pdf');
 
@@ -72,8 +71,6 @@ plot(s, rho1, 'LineWidth',2); hold on;
 plot(s, rho2, 'LineWidth',2);
 plot(s, rho_mean, '--','LineWidth',2);
 plot(s, rho_harm, ':','LineWidth',2);
-xlabel('s'); ylabel('dt/ds');
-title('Traversal time densities');
 grid on;
 exportFig('time_density.pdf');
 
@@ -84,8 +81,6 @@ plot(s, t1, 'LineWidth',2); hold on;
 plot(s, t2, 'LineWidth',2);
 plot(s, t_mean, '--','LineWidth',2);
 plot(s, t_harm, ':','LineWidth',2);
-xlabel('s'); ylabel('time');
-title('Cumulative time maps (unnormalized)');
 grid on;
 exportFig('time_maps_unnormalized.pdf');
 
@@ -101,7 +96,6 @@ plot(s, t1n, 'LineWidth',2); hold on;
 plot(s, t2n, 'LineWidth',2);
 plot(s, tmn, '--','LineWidth',2);
 plot(s, thn, ':','LineWidth',2);
-xlabel('s'); ylabel('normalized time');
-title('Cumulative time maps (normalized)');
+
 grid on;
 exportFig('time_maps_normalized.pdf');

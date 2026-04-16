@@ -23,10 +23,10 @@ set(groot, ...
 epsilon   = 0.1;
 dynamics = true; % false: geometric arc length, true: consider dynamics 
 useColor = true;
-random_samples = false;
+random_samples = true;
 a = -1.0;
 b = 1.0;
-Na = 3;
+Na = 50;
 nFrames = 9;                  % number of snapshots, 0 if to be skipped
 
 
@@ -211,7 +211,7 @@ for k = 1:Na
     V = alignedVel{k};
     allSpeeds(k,:) = sqrt(sum(V.^2,2));
 end
-%meanSpeed = mean(allSpeeds,1).';   % M×1
+
 meanSpeed = 1./ mean(1./allSpeeds,1).'; % harmonic mean
 
 %% ================================================================
@@ -219,11 +219,7 @@ meanSpeed = 1./ mean(1./allSpeeds,1).'; % harmonic mean
 %% ================================================================
 % Initialize plot
 figure('Color','w','Position',[100 100 1100 700]); hold on; axis equal; grid on;
-%if dynamics
-%    title('Fréchet Mean of periodic Van Der Pol solutions with dynamics');
-%else
-%    title('Fréchet Mean of periodic Van Der Pol solutions without dynamics');
-%end
+
 
 if useColor
     colors = lines(Na);            % one color per sample

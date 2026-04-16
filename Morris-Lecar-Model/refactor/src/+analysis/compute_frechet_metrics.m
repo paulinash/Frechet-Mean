@@ -285,6 +285,7 @@ end
 
 s_new = linspace(0, L, Mnew).';
 C_u = interp1(s, C, s_new, 'pchip');     % Mnew x d
+
 end
 
 

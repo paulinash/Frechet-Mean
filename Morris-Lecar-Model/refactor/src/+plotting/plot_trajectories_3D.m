@@ -40,20 +40,6 @@ end
 plot3([meanC(:,1);meanC(1,1)], [meanC(:,2);meanC(1,2)], [meanC(:,3);meanC(1,3)], ...
     'k', 'LineWidth', 3, 'DisplayName', 'mean curve');
 
-%xlabel('V'); ylabel('w'); zlabel('y');
-
-%if isfield(raw,'spikeCounts') && ~isempty(raw.spikeCounts)
-
-%    u = unique(raw.spikeCounts);
-%    if numel(u) == 1
-%        title(sprintf('3D trajectories with %d spikes', u));
-%    else
-%        title('3D trajectories with inconsistent spike count');
-%    end
-%else
-%    title('3D trajectories');
-%end
-
 view([-30 20]);
 
 if plotOpts.export

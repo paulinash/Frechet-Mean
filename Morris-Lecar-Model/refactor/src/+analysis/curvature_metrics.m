@@ -50,6 +50,7 @@ ds_mid = (ds(1:end-1) + ds(2:end)) / 2; % (M-2) x 1
 % Curvature
 kappa = sqrt(sum(dT.^2, 2)) ./ (ds_mid + eps0);  % (M-2) x 1
 
+
 % Summary stats
 m = struct();
 m.kappa = kappa;

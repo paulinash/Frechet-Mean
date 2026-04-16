@@ -64,7 +64,6 @@ out.timeInfo = timeInfo;
 out.meanTimeInfo = meanTimeInfo;
 
 %% Plots
-
 % Plot style setting
 utils.apply_style(S.plot);
 colors = utils.make_colors(N, S.plot.useColor);

@@ -82,18 +82,18 @@ addHeader("Medoid");
 add("Medoid","medoid_idx", metrics.medoid.idx);
 add("Medoid","frechetVar_medoid", metrics.medoid.cost);
 add("Medoid","delta_F med", metrics.medoid.Dmin_medoid);
-add("Medoid","detla_F med normalized", metrics.medoid.Dmin_medoid_normalized);
+add("Medoid","delta_F med normalized", metrics.medoid.Dmin_medoid_normalized);
 add("Medoid","d(med,mean)^2", metrics.medoid.d_to_mean);
 addBlank();
 
 % CURVATURE
 addHeader("Curvature");
-add("Curvature","kappa_mean_meanC", metrics.curvature.arclen.mean.kappa_mean);
-add("Curvature","kappa_rms_meanC", metrics.curvature.arclen.mean.kappa_rms);
+%add("Curvature","kappa_mean_meanC", metrics.curvature.arclen.mean.kappa_mean);
+%add("Curvature","kappa_rms_meanC", metrics.curvature.arclen.mean.kappa_rms);
 add("Curvature","total_curvature_meanC", metrics.curvature.arclen.mean.total_curvature);
 add("Curvature","bending_energy_meanC", metrics.curvature.arclen.mean.bending_energy);
-add("Curvature","total_variation_meanC", metrics.curvature.arclen.mean.kappa_total_variation);
-add("Curvature","second_difference_energy_meanC", metrics.curvature.arclen.mean.kappa_second_difference_energy);
+%add("Curvature","total_variation_meanC", metrics.curvature.arclen.mean.kappa_total_variation);
+%add("Curvature","second_difference_energy_meanC", metrics.curvature.arclen.mean.kappa_second_difference_energy);
 
 % sample stats means
 S = metrics.curvature.arclen.samples;
@@ -111,20 +111,20 @@ beS = mean(bendE_samples);
 tvS = mean(totVar_samples);
 sdS = mean(secDiff_samples);
 
-add("Curvature","kappa_mean_meanSamples", kmS);
-add("Curvature","kappa_rms_meanSamples",  krS);
+%add("Curvature","kappa_mean_meanSamples", kmS);
+%add("Curvature","kappa_rms_meanSamples",  krS);
 add("Curvature","total_curvature_meanSamples", tcS);
 add("Curvature","bending_energy_meanSamples",  beS);
-add("Curvature","total_variation_meanSamples", tvS);
-add("Curvature","second_difference_energy_meanSamples", sdS);
+%add("Curvature","total_variation_meanSamples", tvS);
+%add("Curvature","second_difference_energy_meanSamples", sdS);
 
 % ratios
-add("Curvature","kappa_mean_ratio", metrics.curvature.arclen.mean.kappa_mean / kmS);
-add("Curvature","kappa_rms_ratio",  metrics.curvature.arclen.mean.kappa_rms  / krS);
+%add("Curvature","kappa_mean_ratio", metrics.curvature.arclen.mean.kappa_mean / kmS);
+%add("Curvature","kappa_rms_ratio",  metrics.curvature.arclen.mean.kappa_rms  / krS);
 add("Curvature","total_curvature_ratio", metrics.curvature.arclen.mean.total_curvature / tcS);
 add("Curvature","bending_energy_ratio",  metrics.curvature.arclen.mean.bending_energy / beS);
-add("Curvature","total_variation_ratio", metrics.curvature.arclen.mean.kappa_total_variation / tvS);
-add("Curvature","second_diff_ratio",     metrics.curvature.arclen.mean.kappa_second_difference_energy / sdS);
+%add("Curvature","total_variation_ratio", metrics.curvature.arclen.mean.kappa_total_variation / tvS);
+%add("Curvature","second_diff_ratio",     metrics.curvature.arclen.mean.kappa_second_difference_energy / sdS);
 
 % --- output table ---
 Tlong = table(Group, Name, Value);
