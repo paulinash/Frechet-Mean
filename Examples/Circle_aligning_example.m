@@ -64,7 +64,7 @@ plot(mean_unaligned(:,1), mean_unaligned(:,2),'Color', [0.5 0.5 0.5],'LineWidth'
 
 
 %% EXPORT
-exportgraphics(gcf,'circles_unaligned.pdf','ContentType','image');
+exportgraphics(gcf,'figures_circle_aligning/circles_unaligned.pdf','ContentType','image');
 
 %% --- (2) ALIGNED XY ---
 figure('Position',[100 100 600 600],'Color','w');
@@ -83,4 +83,4 @@ plot(mean_aligned(:,1), mean_aligned(:,2),'Color', [0.5 0.5 0.5],'LineWidth',2);
 
 
 %% EXPORT
-exportgraphics(gcf,'circles_aligned.pdf','ContentType','image');
+exportgraphics(gcf,'figures_circle_aligning/circles_aligned.pdf','ContentType','image');

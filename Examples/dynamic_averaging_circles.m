@@ -1,5 +1,11 @@
 clear; clc; close all;
 
+set(groot, ...
+    'DefaultTextInterpreter','latex', ...
+    'DefaultAxesTickLabelInterpreter','latex', ...
+    'DefaultAxesFontName','Times', ...
+    'DefaultAxesFontSize', 12);
+
 %% Create figure folder
 figDir = 'figures_dynamics';
 if ~exist(figDir, 'dir')
@@ -55,7 +61,8 @@ exportFig = @(name) exportgraphics(gcf, fullfile(figDir, name), 'ContentType','v
 
 %% ---------------------------
 %% Plot 1: Speed profiles
-figure;
+figure; hold on; grid on;
+
 plot(s, v1, 'LineWidth',2); hold on;
 plot(s, v2, 'LineWidth',2);
 plot(s, v_mean, '--','LineWidth',2);
@@ -66,7 +73,7 @@ exportFig('speed_profiles.pdf');
 
 %% ---------------------------
 %% Plot 2: Time densities
-figure;
+figure; hold on; grid on;
 plot(s, rho1, 'LineWidth',2); hold on;
 plot(s, rho2, 'LineWidth',2);
 plot(s, rho_mean, '--','LineWidth',2);
@@ -76,7 +83,7 @@ exportFig('time_density.pdf');
 
 %% ---------------------------
 %% Plot 3: Time maps (UNNORMALIZED — KEY FIX)
-figure;
+figure; hold on; grid on;
 plot(s, t1, 'LineWidth',2); hold on;
 plot(s, t2, 'LineWidth',2);
 plot(s, t_mean, '--','LineWidth',2);
@@ -91,7 +98,7 @@ t2n = t2 / T2;
 tmn = t_mean / T_arith;
 thn = t_harm / T_harm;
 
-figure;
+figure; hold on; grid on;
 plot(s, t1n, 'LineWidth',2); hold on;
 plot(s, t2n, 'LineWidth',2);
 plot(s, tmn, '--','LineWidth',2);
