@@ -1,0 +1,47 @@
+# Autosave files
+*.asv
+*.m~
+*.autosave
+*.slx.r*
+*.mdl.r*
+
+# Derived content-obscured files
+*.p
+
+# Compiled MEX files
+*.mex*
+
+# Packaged app and toolbox files
+*.mlappinstall
+*.mltbx
+
+# Deployable archives
+*.ctf
+
+# Generated helpsearch folders
+helpsearch*/
+
+# Code generation folders
+slprj/
+sccprj/
+codegen/
+
+# Cache files
+*.slxc
+
+# Cloud based storage dotfile
+.MATLABDriveTag
+
+# buildtool cache folder
+.buildtool/
+
+# SimBiology backup files
+*.sbproj.backup
+*.sbproj.bak
+
+# Ignore figures
+Morris-Lecar-Model/refactor/figures/
+Rosenzweig-MacArthur-Model/Figures_rm/
+Van-der-Pol-Model/Frechet_Mean/Figures_vdp/arc_param/
+Van-der-Pol-Model/Frechet_Mean/Figures_vdp/time_param/
+Van-der-Pol-Model/Frechet_Mean/Figures_vdp/time_param
